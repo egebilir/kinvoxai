@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
+import { enqueueJob } from "../config/queue";
 
 export const generateRouter = Router();
 
@@ -14,21 +15,20 @@ const GenerateRequestSchema = z.object({
     .optional(),
 });
 
-type GenerateRequest = z.infer<typeof GenerateRequestSchema>;
-
-generateRouter.post("/", async (req: Request, res: Response) => {
+generateRouter.post("/", (req: Request, res: Response) => {
   try {
-    const body = GenerateRequestSchema.parse(req.body) as GenerateRequest;
+    const body = GenerateRequestSchema.parse(req.body);
 
-    // TODO: Add job to Bull queue for async processing
     const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
+    const job = enqueueJob(jobId, body.prompt, body.type, body.options);
+
     res.status(202).json({
-      jobId,
-      status: "queued",
+      jobId: job.id,
+      status: job.status,
       message: "Generation request accepted",
       type: body.type,
-      createdAt: new Date().toISOString(),
+      createdAt: job.created_at,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -1,33 +1,53 @@
-import { Pool } from "pg";
+import Database from "better-sqlite3";
+import path from "path";
 
-let pool: Pool | null = null;
+let db: Database.Database | null = null;
 
-export function getPool(): Pool {
-  if (!pool) {
+const DB_PATH = process.env.DATABASE_PATH || path.resolve(__dirname, "../../../kinvoxai.db");
+
+export function getDb(): Database.Database {
+  if (!db) {
     throw new Error("Database not initialized. Call connectDatabase() first.");
   }
-  return pool;
+  return db;
 }
 
-export async function connectDatabase(): Promise<void> {
-  pool = new Pool({
-    connectionString:
-      process.env.DATABASE_URL ||
-      "postgresql://kinvoxai:kinvoxai@localhost:5432/kinvoxai",
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+export function connectDatabase(): void {
+  db = new Database(DB_PATH);
 
-  // Test connection
-  const client = await pool.connect();
-  await client.query("SELECT NOW()");
-  client.release();
+  // Enable WAL mode for better concurrent read performance
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+
+  // Create tables if they don't exist
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL DEFAULT 'text',
+      prompt TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',
+      progress INTEGER NOT NULL DEFAULT 0,
+      result TEXT,
+      error TEXT,
+      options TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+    CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
+  `);
+
+  // Verify connection
+  const row = db.prepare("SELECT datetime('now') as time").get() as { time: string };
+  if (!row.time) {
+    throw new Error("SQLite connection verification failed");
+  }
 }
 
-export async function disconnectDatabase(): Promise<void> {
-  if (pool) {
-    await pool.end();
-    pool = null;
+export function disconnectDatabase(): void {
+  if (db) {
+    db.close();
+    db = null;
   }
 }

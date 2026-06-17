@@ -4,15 +4,14 @@ AI-Powered Creative Platform — generate text, images, and audio with cutting-e
 
 ## Tech Stack
 
-| Layer      | Technology                          |
-| ---------- | ----------------------------------- |
-| Frontend   | Next.js 14 (TypeScript, strict)     |
-| Backend    | Node.js + Express (TypeScript)      |
-| Database   | PostgreSQL 16                       |
-| Queue      | Redis 7 + BullMQ                    |
-| Infra      | Docker Compose                      |
-| Validation | Zod                                 |
-| APIs       | Claude, DALL·E, ElevenLabs, Paddle  |
+| Layer      | Technology                         |
+| ---------- | ---------------------------------- |
+| Frontend   | Next.js 14 (TypeScript, strict)    |
+| Backend    | Node.js + Express (TypeScript)     |
+| Database   | SQLite (file-based, zero config)   |
+| Queue      | In-memory (SQLite-backed)          |
+| Validation | Zod                                |
+| APIs       | Claude, DALL·E, ElevenLabs         |
 
 ## Project Structure
 
@@ -24,7 +23,6 @@ kinvoxai/
 │   │       ├── page.tsx           # Landing page
 │   │       ├── dashboard/page.tsx # Dashboard
 │   │       └── settings/page.tsx  # Settings
-│   ├── Dockerfile
 │   ├── package.json
 │   └── tsconfig.json
 ├── backend/                 # Express API server
@@ -32,20 +30,18 @@ kinvoxai/
 │   │   ├── index.ts               # Entry point
 │   │   ├── app.ts                 # Express app setup
 │   │   ├── config/
-│   │   │   ├── database.ts        # PostgreSQL pool
-│   │   │   ├── redis.ts           # Redis client
-│   │   │   └── queue.ts           # BullMQ setup
+│   │   │   ├── database.ts        # SQLite connection
+│   │   │   └── queue.ts           # In-memory job queue
 │   │   ├── routes/
 │   │   │   ├── health.ts          # GET /api/health
 │   │   │   ├── generate.ts        # POST /api/generate
 │   │   │   └── status.ts          # GET /api/status/:jobId
 │   │   ├── middleware/
 │   │   │   └── errorHandler.ts
-│   │   └── migrations/            # DB migrations (empty)
-│   ├── Dockerfile
+│   │   └── migrations/
+│   │       └── seed.ts            # Sample data seeder
 │   ├── package.json
 │   └── tsconfig.json
-├── docker-compose.yml
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -55,8 +51,10 @@ kinvoxai/
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) & Docker Compose
-- [Node.js 20+](https://nodejs.org/) (for local dev without Docker)
+- [Node.js 20+](https://nodejs.org/)
+- npm (comes with Node.js)
+
+That's it. No Docker, no PostgreSQL, no Redis.
 
 ### 1. Clone & Configure
 
@@ -66,50 +64,63 @@ cd kinvoxai
 cp .env.example .env
 ```
 
-Edit `.env` and fill in your API keys (optional for initial setup).
+Edit `.env` and add your API keys (optional for initial setup — the app runs without them).
 
-### 2. Start with Docker Compose
-
-```bash
-docker-compose up --build
-```
-
-This starts all four services:
-
-| Service    | URL                          | Health Check              |
-| ---------- | ---------------------------- | ------------------------- |
-| Frontend   | http://localhost:3000         | `GET /`                   |
-| Backend    | http://localhost:3001         | `GET /api/health`         |
-| PostgreSQL | localhost:5432               | `pg_isready`              |
-| Redis      | localhost:6379               | `redis-cli ping`          |
-
-### 3. Verify Services
-
-```bash
-# Backend health
-curl http://localhost:3001/api/health
-
-# Test generate endpoint
-curl -X POST http://localhost:3001/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Hello world", "type": "text"}'
-
-# Check job status
-curl http://localhost:3001/api/status/job_123
-```
-
-### Local Development (without Docker)
+### 2. Install Dependencies
 
 ```bash
 # Backend
 cd backend
 npm install
-npm run dev
 
-# Frontend (in another terminal)
-cd frontend
+# Frontend
+cd ../frontend
 npm install
+```
+
+### 3. Start the Backend (Terminal 1)
+
+```bash
+cd backend
 npm run dev
+```
+
+The backend starts on **http://localhost:3001**. SQLite database (`kinvoxai.db`) is created automatically on first run.
+
+### 4. Start the Frontend (Terminal 2)
+
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend starts on **http://localhost:3000**.
+
+### 5. (Optional) Seed the Database
+
+```bash
+cd backend
+npm run seed
+```
+
+This inserts sample jobs so you can test the status endpoint immediately.
+
+## Verify Everything Works
+
+```bash
+# Health check
+curl http://localhost:3001/api/health
+
+# Submit a generation job
+curl -X POST http://localhost:3001/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello world", "type": "text"}'
+
+# Check job status (use the jobId from the response above)
+curl http://localhost:3001/api/status/<jobId>
+
+# List all recent jobs
+curl http://localhost:3001/api/status
 ```
 
 ## API Endpoints
@@ -119,6 +130,7 @@ npm run dev
 | GET    | `/api/health`        | Service health check      |
 | POST   | `/api/generate`      | Submit generation job     |
 | GET    | `/api/status/:jobId` | Check job status          |
+| GET    | `/api/status`        | List recent jobs          |
 
 ### POST /api/generate
 
@@ -145,18 +157,32 @@ npm run dev
 }
 ```
 
+### GET /api/health Response
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-06-17T...",
+  "services": {
+    "database": { "type": "sqlite", "status": "connected", "totalJobs": 3 },
+    "queue": { "type": "in-memory", "status": "running" }
+  }
+}
+```
+
 ## Environment Variables
 
-See [`.env.example`](.env.example) for all available configuration options.
+See [`.env.example`](.env.example) for all available configuration.
 
-| Variable              | Description                          |
-| --------------------- | ------------------------------------ |
-| `DATABASE_URL`        | PostgreSQL connection string         |
-| `REDIS_URL`           | Redis connection string              |
-| `CLAUDE_API_KEY`      | Anthropic Claude API key             |
-| `OPENAI_API_KEY`      | OpenAI (DALL·E) API key              |
-| `ELEVENLABS_API_KEY`  | ElevenLabs TTS API key               |
-| `PADDLE_API_KEY`      | Paddle payment API key               |
+| Variable            | Required | Description                 |
+| ------------------- | -------- | --------------------------- |
+| `CLAUDE_API_KEY`    | No*      | Anthropic Claude API key    |
+| `DALLE_API_KEY`     | No*      | OpenAI DALL·E API key       |
+| `ELEVENLABS_API_KEY`| No*      | ElevenLabs TTS API key      |
+| `BACKEND_PORT`      | No       | Backend port (default 3001) |
+| `FRONTEND_PORT`     | No       | Frontend port (default 3000)|
+
+*API keys are only needed when you implement the actual AI generation logic.
 
 ## License
 

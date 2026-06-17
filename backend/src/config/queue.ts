@@ -1,53 +1,78 @@
-import { Queue, Worker, type Job } from "bullmq";
-import { getRedis } from "./redis";
+import { getDb } from "./database";
 
-const QUEUE_NAME = "kinvoxai-jobs";
+export interface QueueJob {
+  id: string;
+  type: string;
+  prompt: string;
+  status: string;
+  progress: number;
+  result: string | null;
+  error: string | null;
+  options: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-let jobQueue: Queue | null = null;
+/**
+ * In-memory job queue backed by SQLite.
+ * Jobs are persisted to the database and processed in-process.
+ * For production, swap this with Redis + BullMQ.
+ */
+export function enqueueJob(
+  id: string,
+  prompt: string,
+  type: string,
+  options?: Record<string, unknown>
+): QueueJob {
+  const db = getDb();
 
-export function getQueue(): Queue {
-  if (!jobQueue) {
-    throw new Error("Queue not initialized. Call initQueue() first.");
+  const stmt = db.prepare(`
+    INSERT INTO jobs (id, prompt, type, status, progress, options, created_at, updated_at)
+    VALUES (?, ?, ?, 'queued', 0, ?, datetime('now'), datetime('now'))
+  `);
+
+  stmt.run(id, prompt, type, options ? JSON.stringify(options) : null);
+
+  const job = db.prepare("SELECT * FROM jobs WHERE id = ?").get(id) as QueueJob;
+  return job;
+}
+
+export function getJob(id: string): QueueJob | undefined {
+  const db = getDb();
+  return db.prepare("SELECT * FROM jobs WHERE id = ?").get(id) as QueueJob | undefined;
+}
+
+export function updateJobStatus(
+  id: string,
+  status: string,
+  progress?: number,
+  result?: string,
+  error?: string
+): void {
+  const db = getDb();
+
+  const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
+  const params: (string | number)[] = [status];
+
+  if (progress !== undefined) {
+    updates.push("progress = ?");
+    params.push(progress);
   }
-  return jobQueue;
+  if (result !== undefined) {
+    updates.push("result = ?");
+    params.push(result);
+  }
+  if (error !== undefined) {
+    updates.push("error = ?");
+    params.push(error);
+  }
+
+  params.push(id);
+
+  db.prepare(`UPDATE jobs SET ${updates.join(", ")} WHERE id = ?`).run(...params);
 }
 
-export function initQueue(): Queue {
-  const connection = getRedis();
-
-  jobQueue = new Queue(QUEUE_NAME, {
-    connection,
-    defaultJobOptions: {
-      removeOnComplete: { count: 100 },
-      removeOnFail: { count: 50 },
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 1000,
-      },
-    },
-  });
-
-  return jobQueue;
-}
-
-export function createWorker(
-  processor: (job: Job) => Promise<void>
-): Worker {
-  const connection = getRedis();
-
-  const worker = new Worker(QUEUE_NAME, processor, {
-    connection,
-    concurrency: 5,
-  });
-
-  worker.on("completed", (job: Job) => {
-    console.log(`✅ Job ${job.id} completed`);
-  });
-
-  worker.on("failed", (job: Job | undefined, err: Error) => {
-    console.error(`❌ Job ${job?.id} failed:`, err.message);
-  });
-
-  return worker;
+export function listRecentJobs(limit = 50): QueueJob[] {
+  const db = getDb();
+  return db.prepare("SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?").all(limit) as QueueJob[];
 }
