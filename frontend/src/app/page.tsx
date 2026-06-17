@@ -1,7 +1,13 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./page.module.css";
 import Link from "next/link";
+import { LanguageToggle } from "../components/LanguageToggle";
 
 export default function Home() {
+  const t = useTranslations();
+
   return (
     <main className={styles.main}>
       <div className={styles.bgGlow} />
@@ -11,52 +17,51 @@ export default function Home() {
           <span className="gradient-text">Kinvox</span>AI
         </div>
         <div className={styles.navLinks}>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/settings">Settings</Link>
-          <button className="btn-primary">Get Started</button>
+          <Link href="/dashboard">{t("nav.dashboard")}</Link>
+          <Link href="/settings">{t("nav.settings")}</Link>
+          <LanguageToggle />
+          <button className="btn-primary">{t("nav.getStarted")}</button>
         </div>
       </nav>
 
       <section className={styles.hero}>
         <div className={styles.badge}>
           <span className={styles.badgeDot} />
-          Now in Early Access
+          {t("landing.badge")}
         </div>
         <h1 className={styles.title}>
-          Create with <span className="gradient-text">AI-Powered</span>
+          {t("landing.titleLine1")}{" "}
+          <span className="gradient-text">{t("landing.titleHighlight")}</span>
           <br />
-          Intelligence
+          {t("landing.titleLine2")}
         </h1>
-        <p className={styles.subtitle}>
-          Generate stunning text, images, and audio using cutting-edge AI
-          models. One platform, unlimited creative possibilities.
-        </p>
+        <p className={styles.subtitle}>{t("landing.subtitle")}</p>
         <div className={styles.actions}>
-          <button className="btn-primary">Start Creating →</button>
-          <button className="btn-secondary">View Demo</button>
+          <button className="btn-primary">{t("landing.startCreating")}</button>
+          <button className="btn-secondary">{t("landing.viewDemo")}</button>
         </div>
       </section>
 
       <section className={styles.features}>
         <div className={`glass-card ${styles.featureCard}`}>
           <div className={styles.featureIcon}>✍️</div>
-          <h3>Text Generation</h3>
-          <p>Powered by Claude for nuanced, creative text generation.</p>
+          <h3>{t("landing.features.textTitle")}</h3>
+          <p>{t("landing.features.textDesc")}</p>
         </div>
         <div className={`glass-card ${styles.featureCard}`}>
           <div className={styles.featureIcon}>🎨</div>
-          <h3>Image Creation</h3>
-          <p>Create stunning visuals with DALL·E integration.</p>
+          <h3>{t("landing.features.imageTitle")}</h3>
+          <p>{t("landing.features.imageDesc")}</p>
         </div>
         <div className={`glass-card ${styles.featureCard}`}>
           <div className={styles.featureIcon}>🔊</div>
-          <h3>Audio Synthesis</h3>
-          <p>Natural voice generation via ElevenLabs.</p>
+          <h3>{t("landing.features.audioTitle")}</h3>
+          <p>{t("landing.features.audioDesc")}</p>
         </div>
       </section>
 
       <footer className={styles.footer}>
-        <p>© 2026 KinvoxAI. All rights reserved.</p>
+        <p>{t("landing.footer")}</p>
       </footer>
     </main>
   );

@@ -1,0 +1,72 @@
+{
+  "nav": {
+    "dashboard": "Kontrol Paneli",
+    "settings": "Ayarlar",
+    "getStarted": "Başla"
+  },
+  "landing": {
+    "badge": "Erken Erişimde",
+    "titleLine1": "Yapay Zeka ile",
+    "titleHighlight": "AI Destekli",
+    "titleLine2": "Üretim Yapın",
+    "subtitle": "En son yapay zeka modelleriyle çarpıcı metinler, görseller ve sesler oluşturun. Tek platform, sınırsız yaratıcı olasılıklar.",
+    "startCreating": "Üretmeye Başla →",
+    "viewDemo": "Demo İzle",
+    "features": {
+      "textTitle": "Metin Üretimi",
+      "textDesc": "Claude ile ayrıntılı ve yaratıcı metin üretimi.",
+      "imageTitle": "Görsel Oluşturma",
+      "imageDesc": "DALL·E entegrasyonuyla çarpıcı görseller oluşturun.",
+      "audioTitle": "Ses Sentezi",
+      "audioDesc": "ElevenLabs ile doğal ses üretimi."
+    },
+    "footer": "© 2026 KinvoxAI. Tüm hakları saklıdır."
+  },
+  "sidebar": {
+    "dashboard": "Kontrol Paneli",
+    "generate": "Üret",
+    "history": "Geçmiş",
+    "settings": "Ayarlar"
+  },
+  "dashboard": {
+    "title": "Kontrol Paneli",
+    "subtitle": "Tekrar hoş geldiniz. İşte genel bakışınız.",
+    "stats": {
+      "totalGenerations": "Toplam Üretim",
+      "activeJobs": "Aktif İşler",
+      "creditsUsed": "Kullanılan Kredi",
+      "apiCallsToday": "Bugünkü API Çağrıları"
+    },
+    "recentActivity": "Son Aktivite",
+    "emptyState": "Henüz aktivite yok. İlk üretiminizi oluşturarak başlayın.",
+    "createNew": "Yeni Oluştur →"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "subtitle": "API anahtarlarınızı ve tercihlerinizi yapılandırın.",
+    "apiKeys": {
+      "title": "API Anahtarları",
+      "desc": "Yapay zeka hizmet sağlayıcılarınızı bağlayın.",
+      "claudeLabel": "Claude API Anahtarı",
+      "claudePlaceholder": "sk-ant-...",
+      "openaiLabel": "OpenAI API Anahtarı",
+      "openaiPlaceholder": "sk-...",
+      "elevenlabsLabel": "ElevenLabs API Anahtarı",
+      "elevenlabsPlaceholder": "ElevenLabs anahtarınızı girin"
+    },
+    "billing": {
+      "title": "Faturalandırma",
+      "desc": "Paddle üzerinden aboneliğinizi ve ödeme yönteminizi yönetin.",
+      "freePlan": "Ücretsiz Plan",
+      "upgradePlan": "Planı Yükselt"
+    },
+    "preferences": {
+      "title": "Tercihler",
+      "desc": "Deneyiminizi özelleştirin.",
+      "defaultModel": "Varsayılan Model"
+    }
+  },
+  "langToggle": {
+    "switchTo": "Switch to English"
+  }
+}

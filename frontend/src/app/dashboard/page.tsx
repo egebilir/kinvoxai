@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./page.module.css";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Dashboard – KinvoxAI",
-  description: "Manage your AI-generated content and monitor active jobs.",
-};
-
 export default function DashboardPage() {
+  const t = useTranslations();
+
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
@@ -16,16 +15,16 @@ export default function DashboardPage() {
         </div>
         <nav className={styles.sidebarNav}>
           <Link href="/dashboard" className={styles.navItemActive}>
-            📊 Dashboard
+            📊 {t("sidebar.dashboard")}
           </Link>
           <Link href="/dashboard" className={styles.navItem}>
-            ✍️ Generate
+            ✍️ {t("sidebar.generate")}
           </Link>
           <Link href="/dashboard" className={styles.navItem}>
-            📁 History
+            📁 {t("sidebar.history")}
           </Link>
           <Link href="/settings" className={styles.navItem}>
-            ⚙️ Settings
+            ⚙️ {t("sidebar.settings")}
           </Link>
         </nav>
       </aside>
@@ -33,37 +32,43 @@ export default function DashboardPage() {
       <main className={styles.main}>
         <header className={styles.header}>
           <div>
-            <h1>Dashboard</h1>
-            <p className={styles.headerSub}>
-              Welcome back. Here&apos;s your overview.
-            </p>
+            <h1>{t("dashboard.title")}</h1>
+            <p className={styles.headerSub}>{t("dashboard.subtitle")}</p>
           </div>
         </header>
 
         <div className={styles.statsGrid}>
           <div className={`glass-card ${styles.statCard}`}>
-            <span className={styles.statLabel}>Total Generations</span>
+            <span className={styles.statLabel}>
+              {t("dashboard.stats.totalGenerations")}
+            </span>
             <span className={styles.statValue}>0</span>
           </div>
           <div className={`glass-card ${styles.statCard}`}>
-            <span className={styles.statLabel}>Active Jobs</span>
+            <span className={styles.statLabel}>
+              {t("dashboard.stats.activeJobs")}
+            </span>
             <span className={styles.statValue}>0</span>
           </div>
           <div className={`glass-card ${styles.statCard}`}>
-            <span className={styles.statLabel}>Credits Used</span>
+            <span className={styles.statLabel}>
+              {t("dashboard.stats.creditsUsed")}
+            </span>
             <span className={styles.statValue}>0</span>
           </div>
           <div className={`glass-card ${styles.statCard}`}>
-            <span className={styles.statLabel}>API Calls Today</span>
+            <span className={styles.statLabel}>
+              {t("dashboard.stats.apiCallsToday")}
+            </span>
             <span className={styles.statValue}>0</span>
           </div>
         </div>
 
         <section className={`glass-card ${styles.recentSection}`}>
-          <h2>Recent Activity</h2>
+          <h2>{t("dashboard.recentActivity")}</h2>
           <div className={styles.emptyState}>
-            <p>No activity yet. Start by creating your first generation.</p>
-            <button className="btn-primary">Create New →</button>
+            <p>{t("dashboard.emptyState")}</p>
+            <button className="btn-primary">{t("dashboard.createNew")}</button>
           </div>
         </section>
       </main>

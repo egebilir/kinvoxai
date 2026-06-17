@@ -1,0 +1,72 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "getStarted": "Get Started"
+  },
+  "landing": {
+    "badge": "Now in Early Access",
+    "titleLine1": "Create with",
+    "titleHighlight": "AI-Powered",
+    "titleLine2": "Intelligence",
+    "subtitle": "Generate stunning text, images, and audio using cutting-edge AI models. One platform, unlimited creative possibilities.",
+    "startCreating": "Start Creating →",
+    "viewDemo": "View Demo",
+    "features": {
+      "textTitle": "Text Generation",
+      "textDesc": "Powered by Claude for nuanced, creative text generation.",
+      "imageTitle": "Image Creation",
+      "imageDesc": "Create stunning visuals with DALL·E integration.",
+      "audioTitle": "Audio Synthesis",
+      "audioDesc": "Natural voice generation via ElevenLabs."
+    },
+    "footer": "© 2026 KinvoxAI. All rights reserved."
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "generate": "Generate",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back. Here's your overview.",
+    "stats": {
+      "totalGenerations": "Total Generations",
+      "activeJobs": "Active Jobs",
+      "creditsUsed": "Credits Used",
+      "apiCallsToday": "API Calls Today"
+    },
+    "recentActivity": "Recent Activity",
+    "emptyState": "No activity yet. Start by creating your first generation.",
+    "createNew": "Create New →"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your API keys and preferences.",
+    "apiKeys": {
+      "title": "API Keys",
+      "desc": "Connect your AI service providers.",
+      "claudeLabel": "Claude API Key",
+      "claudePlaceholder": "sk-ant-...",
+      "openaiLabel": "OpenAI API Key",
+      "openaiPlaceholder": "sk-...",
+      "elevenlabsLabel": "ElevenLabs API Key",
+      "elevenlabsPlaceholder": "Enter your ElevenLabs key"
+    },
+    "billing": {
+      "title": "Billing",
+      "desc": "Manage your subscription and payment method via Paddle.",
+      "freePlan": "Free Plan",
+      "upgradePlan": "Upgrade Plan"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "desc": "Customize your experience.",
+      "defaultModel": "Default Model"
+    }
+  },
+  "langToggle": {
+    "switchTo": "Türkçe'ye geç"
+  }
+}

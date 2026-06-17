@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./page.module.css";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Settings – KinvoxAI",
-  description: "Configure your API keys, preferences, and account settings.",
-};
-
 export default function SettingsPage() {
+  const t = useTranslations();
+
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
@@ -16,59 +15,63 @@ export default function SettingsPage() {
         </div>
         <nav className={styles.sidebarNav}>
           <Link href="/dashboard" className={styles.navItem}>
-            📊 Dashboard
+            📊 {t("sidebar.dashboard")}
           </Link>
           <Link href="/dashboard" className={styles.navItem}>
-            ✍️ Generate
+            ✍️ {t("sidebar.generate")}
           </Link>
           <Link href="/dashboard" className={styles.navItem}>
-            📁 History
+            📁 {t("sidebar.history")}
           </Link>
           <Link href="/settings" className={styles.navItemActive}>
-            ⚙️ Settings
+            ⚙️ {t("sidebar.settings")}
           </Link>
         </nav>
       </aside>
 
       <main className={styles.main}>
         <header className={styles.header}>
-          <h1>Settings</h1>
-          <p className={styles.headerSub}>
-            Configure your API keys and preferences.
-          </p>
+          <h1>{t("settings.title")}</h1>
+          <p className={styles.headerSub}>{t("settings.subtitle")}</p>
         </header>
 
         <div className={styles.sections}>
           <section className={`glass-card ${styles.section}`}>
-            <h2>API Keys</h2>
+            <h2>{t("settings.apiKeys.title")}</h2>
             <p className={styles.sectionDesc}>
-              Connect your AI service providers.
+              {t("settings.apiKeys.desc")}
             </p>
             <div className={styles.fieldGroup}>
               <div className={styles.field}>
-                <label htmlFor="claude-key">Claude API Key</label>
+                <label htmlFor="claude-key">
+                  {t("settings.apiKeys.claudeLabel")}
+                </label>
                 <input
                   id="claude-key"
                   type="password"
-                  placeholder="sk-ant-..."
+                  placeholder={t("settings.apiKeys.claudePlaceholder")}
                   className={styles.input}
                 />
               </div>
               <div className={styles.field}>
-                <label htmlFor="openai-key">OpenAI API Key</label>
+                <label htmlFor="openai-key">
+                  {t("settings.apiKeys.openaiLabel")}
+                </label>
                 <input
                   id="openai-key"
                   type="password"
-                  placeholder="sk-..."
+                  placeholder={t("settings.apiKeys.openaiPlaceholder")}
                   className={styles.input}
                 />
               </div>
               <div className={styles.field}>
-                <label htmlFor="elevenlabs-key">ElevenLabs API Key</label>
+                <label htmlFor="elevenlabs-key">
+                  {t("settings.apiKeys.elevenlabsLabel")}
+                </label>
                 <input
                   id="elevenlabs-key"
                   type="password"
-                  placeholder="Enter your ElevenLabs key"
+                  placeholder={t("settings.apiKeys.elevenlabsPlaceholder")}
                   className={styles.input}
                 />
               </div>
@@ -76,24 +79,30 @@ export default function SettingsPage() {
           </section>
 
           <section className={`glass-card ${styles.section}`}>
-            <h2>Billing</h2>
+            <h2>{t("settings.billing.title")}</h2>
             <p className={styles.sectionDesc}>
-              Manage your subscription and payment method via Paddle.
+              {t("settings.billing.desc")}
             </p>
             <div className={styles.billingInfo}>
-              <span className={styles.planBadge}>Free Plan</span>
-              <button className="btn-primary">Upgrade Plan</button>
+              <span className={styles.planBadge}>
+                {t("settings.billing.freePlan")}
+              </span>
+              <button className="btn-primary">
+                {t("settings.billing.upgradePlan")}
+              </button>
             </div>
           </section>
 
           <section className={`glass-card ${styles.section}`}>
-            <h2>Preferences</h2>
+            <h2>{t("settings.preferences.title")}</h2>
             <p className={styles.sectionDesc}>
-              Customize your experience.
+              {t("settings.preferences.desc")}
             </p>
             <div className={styles.fieldGroup}>
               <div className={styles.field}>
-                <label htmlFor="default-model">Default Model</label>
+                <label htmlFor="default-model">
+                  {t("settings.preferences.defaultModel")}
+                </label>
                 <select id="default-model" className={styles.input}>
                   <option value="claude">Claude</option>
                   <option value="gpt4">GPT-4</option>
