@@ -5,14 +5,9 @@ import { enqueueJob } from "../config/queue";
 export const generateRouter = Router();
 
 const GenerateRequestSchema = z.object({
-  prompt: z.string().min(1).max(10000),
-  type: z.enum(["text", "image", "audio"]).default("text"),
-  options: z
-    .object({
-      model: z.string().optional(),
-      temperature: z.number().min(0).max(2).optional(),
-    })
-    .optional(),
+  story_prompt: z.string().min(1, "Story prompt is required").max(10000),
+  duration: z.enum(["short", "long"]),
+  style: z.enum(["horror", "adventure", "comedy", "drama", "scifi"]),
 });
 
 generateRouter.post("/", (req: Request, res: Response) => {
@@ -21,13 +16,17 @@ generateRouter.post("/", (req: Request, res: Response) => {
 
     const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-    const job = enqueueJob(jobId, body.prompt, body.type, body.options);
+    const job = enqueueJob(jobId, body.story_prompt, "story", {
+      style: body.style,
+      duration: body.duration,
+    });
 
     res.status(202).json({
       jobId: job.id,
       status: job.status,
-      message: "Generation request accepted",
-      type: body.type,
+      message: "Story generation started",
+      duration: body.duration,
+      style: body.style,
       createdAt: job.created_at,
     });
   } catch (error) {

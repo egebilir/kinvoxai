@@ -66,6 +66,32 @@
       "defaultModel": "Varsayılan Model"
     }
   },
+  "generate": {
+    "title": "Hikaye Oluştur",
+    "subtitle": "Video içerikleri için yapay zeka destekli hikayeler oluşturun.",
+    "promptLabel": "Hikaye Konusu",
+    "promptPlaceholder": "örn., bir alışveriş merkezinde zombi kıyameti...",
+    "durationLabel": "Süre",
+    "durationShort": "🎵 TikTok (1-1.5 dk)",
+    "durationLong": "🎬 YouTube (5-7 dk)",
+    "styleLabel": "Tarz",
+    "styles": {
+      "horror": "🧟 Korku",
+      "adventure": "⚔️ Macera",
+      "comedy": "😂 Komedi",
+      "drama": "🎭 Drama",
+      "scifi": "🚀 Bilim Kurgu"
+    },
+    "submit": "Hikaye Oluştur ✨",
+    "generating": "Oluşturuluyor... Lütfen bekleyin",
+    "progressLabel": "Hikayeniz oluşturuluyor...",
+    "progressHint": "Claude anlatınızı oluşturuyor. Bu genellikle 15-30 saniye sürer.",
+    "errorTitle": "Oluşturma Başarısız",
+    "fullStory": "Tam Hikaye",
+    "sceneBreakdown": "Sahne Dağılımı",
+    "sceneLabel": "Sahne",
+    "scenes": "sahne"
+  },
   "langToggle": {
     "switchTo": "Switch to English"
   }

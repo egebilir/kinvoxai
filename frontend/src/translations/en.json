@@ -66,6 +66,32 @@
       "defaultModel": "Default Model"
     }
   },
+  "generate": {
+    "title": "Generate Story",
+    "subtitle": "Create AI-powered stories for video content.",
+    "promptLabel": "Story Prompt",
+    "promptPlaceholder": "e.g., zombie apocalypse survival in a shopping mall...",
+    "durationLabel": "Duration",
+    "durationShort": "🎵 TikTok (1-1.5 min)",
+    "durationLong": "🎬 YouTube (5-7 min)",
+    "styleLabel": "Style",
+    "styles": {
+      "horror": "🧟 Horror",
+      "adventure": "⚔️ Adventure",
+      "comedy": "😂 Comedy",
+      "drama": "🎭 Drama",
+      "scifi": "🚀 Sci-Fi"
+    },
+    "submit": "Generate Story ✨",
+    "generating": "Generating... Please wait",
+    "progressLabel": "Generating your story...",
+    "progressHint": "Claude is crafting your narrative. This usually takes 15-30 seconds.",
+    "errorTitle": "Generation Failed",
+    "fullStory": "Full Story",
+    "sceneBreakdown": "Scene Breakdown",
+    "sceneLabel": "Scene",
+    "scenes": "scenes"
+  },
   "langToggle": {
     "switchTo": "Türkçe'ye geç"
   }

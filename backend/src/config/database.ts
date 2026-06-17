@@ -36,6 +36,20 @@ export function connectDatabase(): void {
 
     CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
     CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
+
+    CREATE TABLE IF NOT EXISTS stories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
+      title TEXT NOT NULL,
+      story TEXT NOT NULL,
+      scenes TEXT NOT NULL,
+      prompt TEXT NOT NULL,
+      style TEXT NOT NULL,
+      duration TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_stories_job_id ON stories(job_id);
   `);
 
   // Verify connection
