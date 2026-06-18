@@ -43,27 +43,38 @@ generateImagesRouter.post("/", async (req: Request, res: Response) => {
       return;
     }
 
-    // Check if images already generated
-    if (story.image_paths) {
-      const existingPaths = JSON.parse(story.image_paths) as string[];
-      if (existingPaths.length > 0 && existingPaths[0] !== "/images/placeholder.svg") {
-        res.json({
-          jobId: body.jobId,
-          status: "already_completed",
-          imagePaths: existingPaths,
-        });
-        return;
-      }
+    // Check if images already generated — only skip regeneration if every
+    // scene succeeded. A previous partial failure (one scene still a
+    // placeholder) must not be reported as already_completed, otherwise
+    // that scene can never be retried.
+    const existingPaths: string[] = story.image_paths ? JSON.parse(story.image_paths) : [];
+    const isPlaceholder = (p: string | undefined) => !p || p === "/images/placeholder.svg";
+
+    if (existingPaths.length === body.scenes.length && existingPaths.every((p) => !isPlaceholder(p))) {
+      res.json({
+        jobId: body.jobId,
+        status: "already_completed",
+        imagePaths: existingPaths,
+      });
+      return;
     }
 
-    console.log(`🖼️  Starting image generation for job ${body.jobId} (${body.scenes.length} scenes)`);
+    // Only (re)generate scenes that don't already have a successful image,
+    // so a retry after a partial failure doesn't re-pay for scenes that
+    // already succeeded.
+    const indicesToGenerate = body.scenes
+      .map((_, index) => index)
+      .filter((index) => isPlaceholder(existingPaths[index]));
 
-    // Generate + save all scene images in parallel
-    const sceneResults = await Promise.all(
-      body.scenes.map((scenePrompt, index) => generateSceneImage(body.jobId, scenePrompt, index))
+    console.log(
+      `🖼️  Starting image generation for job ${body.jobId} (${indicesToGenerate.length}/${body.scenes.length} scenes need generation)`
     );
 
-    const imagePaths: string[] = [];
+    const sceneResults = await Promise.all(
+      indicesToGenerate.map((index) => generateSceneImage(body.jobId, body.scenes[index], index))
+    );
+
+    const imagePaths: string[] = [...existingPaths];
     const errors: string[] = [];
     for (const { index, path: imagePath, error } of sceneResults) {
       imagePaths[index] = imagePath;

@@ -19,6 +19,13 @@ interface ReplicateModel {
   latest_version?: { id: string };
 }
 
+class ReplicateApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+    this.name = "ReplicateApiError";
+  }
+}
+
 // stability-ai/sdxl is a community model, not one of Replicate's "official"
 // models, so it doesn't support the /v1/models/{owner}/{name}/predictions
 // shorthand (that 404s). We have to resolve its current version id and use
@@ -122,7 +129,7 @@ async function createPrediction(prompt: string, apiToken: string): Promise<Repli
 
   if (!response.ok) {
     const errBody = await response.text();
-    throw new Error(`Replicate API error (${response.status}): ${errBody}`);
+    throw new ReplicateApiError(response.status, `Replicate API error (${response.status}): ${errBody}`);
   }
 
   return (await response.json()) as ReplicatePrediction;
@@ -172,12 +179,27 @@ function extractImageUrl(prediction: ReplicatePrediction): string {
  * stability-ai/sdxl model. Returns the remote image URL — callers are
  * responsible for downloading/persisting it (see saveImageLocally).
  */
+// Replicate billing can lag a few seconds behind a credit top-up, returning
+// 402 even with a non-zero balance. Worth one short retry before giving up.
+const INSUFFICIENT_CREDIT_RETRY_DELAY_MS = 10_000;
+
 export async function generateImage(prompt: string): Promise<string> {
   const apiToken = getApiToken();
 
   console.log(`🎨 Replicate: generating image (${prompt.length} chars prompt)...`);
 
-  const created = await createPrediction(prompt, apiToken);
+  let created: ReplicatePrediction;
+  try {
+    created = await createPrediction(prompt, apiToken);
+  } catch (err) {
+    if (err instanceof ReplicateApiError && err.status === 402) {
+      console.warn("⏳ Replicate: 402 insufficient credit, retrying once after a short delay...");
+      await new Promise((resolve) => setTimeout(resolve, INSUFFICIENT_CREDIT_RETRY_DELAY_MS));
+      created = await createPrediction(prompt, apiToken);
+    } else {
+      throw err;
+    }
+  }
 
   if (created.status === "failed" || created.status === "canceled") {
     throw new Error(created.error || `Replicate prediction ${created.status}`);
