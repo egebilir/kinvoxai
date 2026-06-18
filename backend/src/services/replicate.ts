@@ -4,7 +4,7 @@ import https from "https";
 import http from "http";
 
 const IMAGES_DIR = path.resolve(__dirname, "../../public/images");
-const REPLICATE_MODEL = "stability-ai/stable-diffusion";
+const REPLICATE_MODEL = "stability-ai/sdxl";
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 60; // ~2 minutes total
 
@@ -126,9 +126,8 @@ function extractImageUrl(prediction: ReplicatePrediction): string {
 
 /**
  * Generate an image from a scene description using Replicate's
- * stability-ai/stable-diffusion model. Returns the remote image URL —
- * callers are responsible for downloading/persisting it (see
- * saveImageLocally).
+ * stability-ai/sdxl model. Returns the remote image URL — callers are
+ * responsible for downloading/persisting it (see saveImageLocally).
  */
 export async function generateImage(prompt: string): Promise<string> {
   const apiToken = getApiToken();
