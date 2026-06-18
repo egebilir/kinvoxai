@@ -45,6 +45,7 @@ export function connectDatabase(): void {
       seslendirme TEXT NOT NULL,
       sahneler_tr TEXT NOT NULL,
       sahneler_en TEXT NOT NULL,
+      image_paths TEXT,
       prompt TEXT NOT NULL,
       style TEXT NOT NULL,
       duration TEXT NOT NULL,
@@ -53,6 +54,12 @@ export function connectDatabase(): void {
 
     CREATE INDEX IF NOT EXISTS idx_stories_job_id ON stories(job_id);
   `);
+
+  // Migrate: add image_paths column for databases created before this field existed
+  const storyColumns = db.prepare("PRAGMA table_info(stories)").all() as { name: string }[];
+  if (!storyColumns.some((col) => col.name === "image_paths")) {
+    db.exec("ALTER TABLE stories ADD COLUMN image_paths TEXT");
+  }
 
   // Verify connection
   const row = db.prepare("SELECT datetime('now') as time").get() as { time: string };

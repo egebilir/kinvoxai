@@ -97,3 +97,78 @@
 .sceneItemEn { border-color: rgba(59, 130, 246, 0.2); background: rgba(59, 130, 246, 0.03); }
 .sceneNumberEn { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
 
+/* Image progress */
+.progressDotImage { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; animation: pulse 1.5s ease-in-out infinite; }
+.progressFillImage { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 100px; animation: shimmer 2s ease-in-out infinite; }
+@keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* Success badge */
+.metaBadgeSuccess { background: rgba(34, 197, 94, 0.1) !important; border-color: rgba(34, 197, 94, 0.3) !important; color: #22c55e !important; }
+
+/* Scene Images */
+.imagesCard { padding: 28px; }
+.imagesCard h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+.imageWarning { color: #f59e0b; font-size: 0.8rem; margin-bottom: 16px; }
+
+.imagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.imageItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.sceneImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.sceneImage:hover {
+  transform: scale(1.05);
+}
+
+.imageLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.imageLabelNum {
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* Scene label */
+.sceneLabel { font-size: 0.7rem; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+@media (max-width: 768px) {
+  .imagesGrid { grid-template-columns: repeat(2, 1fr); }
+  .formRow { grid-template-columns: 1fr; }
+}

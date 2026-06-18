@@ -91,7 +91,12 @@
     "seslendirme": "Voiceover Script (Seslendirme)",
     "sahnelerTr": "Scenes — Turkish",
     "sahnelerEn": "Scenes — English (for DALL-E)",
-    "scenes": "scenes"
+    "scenes": "scenes",
+    "sceneLabel": "Scene",
+    "imageProgressLabel": "🖼️ Generating scene images...",
+    "imageProgressHint": "DALL-E 3 is creating cartoon illustrations for each scene. This may take 1-2 minutes.",
+    "sceneImages": "Scene Images",
+    "imagesReady": "Images Ready"
   },
   "langToggle": {
     "switchTo": "Türkçe'ye geç"

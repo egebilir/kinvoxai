@@ -20,6 +20,10 @@ backend/dist/
 *.db-wal
 *.db-shm
 
+# Generated images (runtime output, keep placeholder)
+backend/public/images/*/
+backend/public/images/*.png
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

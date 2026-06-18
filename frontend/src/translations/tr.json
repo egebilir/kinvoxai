@@ -91,7 +91,12 @@
     "seslendirme": "Seslendirme Metni",
     "sahnelerTr": "Sahneler — Türkçe",
     "sahnelerEn": "Sahneler — İngilizce (DALL-E için)",
-    "scenes": "sahne"
+    "scenes": "sahne",
+    "sceneLabel": "Sahne",
+    "imageProgressLabel": "🖼️ Sahne görselleri oluşturuluyor...",
+    "imageProgressHint": "DALL-E 3 her sahne için karikatür çizimler oluşturuyor. Bu 1-2 dakika sürebilir.",
+    "sceneImages": "Sahne Görselleri",
+    "imagesReady": "Görseller Hazır"
   },
   "langToggle": {
     "switchTo": "Switch to English"

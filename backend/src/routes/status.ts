@@ -10,6 +10,7 @@ interface StoryRow {
   seslendirme: string;
   sahneler_tr: string;
   sahneler_en: string;
+  image_paths: string | null;
   style: string;
   duration: string;
   created_at: string;
@@ -51,6 +52,7 @@ statusRouter.get("/:jobId", (req: Request<{ jobId: string }>, res: Response) => 
           seslendirme: story.seslendirme,
           sahneler_tr: sahnelerTr,
           sahneler_en: sahnelerEn,
+          imagePaths: story.image_paths ? (JSON.parse(story.image_paths) as string[]) : null,
           style: story.style,
           duration: story.duration,
           sahneSayisi: sahnelerTr.length,

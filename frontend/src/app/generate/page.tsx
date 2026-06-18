@@ -6,6 +6,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 
 type JobStatus = "idle" | "queued" | "processing" | "completed" | "failed";
+type ImageStatus = "idle" | "generating" | "completed" | "failed";
 
 interface StoryResult {
   baslik: string;
@@ -13,6 +14,7 @@ interface StoryResult {
   seslendirme: string;
   sahneler_tr: string[];
   sahneler_en: string[];
+  imagePaths: string[] | null;
   style: string;
   duration: string;
   sahneSayisi: number;
@@ -24,6 +26,13 @@ interface StatusResponse {
   progress: number;
   error: string | null;
   result: StoryResult | null;
+}
+
+interface ImageGenResponse {
+  jobId: string;
+  status: string;
+  imagePaths: string[];
+  errors?: string[];
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -41,6 +50,11 @@ export default function GeneratePage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Image generation state
+  const [imageStatus, setImageStatus] = useState<ImageStatus>("idle");
+  const [imagePaths, setImagePaths] = useState<string[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+
   const pollStatus = useCallback(async (id: string) => {
     try {
       const res = await fetch(`${API_URL}/api/status/${id}`);
@@ -51,6 +65,11 @@ export default function GeneratePage() {
 
       if (data.status === "completed" && data.result) {
         setResult(data.result);
+        // If images already exist (from a previous run), use them
+        if (data.result.imagePaths && data.result.imagePaths.length > 0) {
+          setImagePaths(data.result.imagePaths);
+          setImageStatus("completed");
+        }
         return true;
       }
       if (data.status === "failed") {
@@ -62,6 +81,50 @@ export default function GeneratePage() {
       return false;
     }
   }, []);
+
+  // Auto-trigger image generation after story completes
+  useEffect(() => {
+    if (
+      status === "completed" &&
+      result &&
+      jobId &&
+      imageStatus === "idle" &&
+      result.sahneler_en.length > 0 &&
+      (!result.imagePaths || result.imagePaths.length === 0)
+    ) {
+      generateImagesForStory(jobId, result.sahneler_en);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, result, jobId, imageStatus]);
+
+  async function generateImagesForStory(id: string, scenes: string[]): Promise<void> {
+    setImageStatus("generating");
+    setImageError(null);
+
+    try {
+      const res = await fetch(`${API_URL}/api/generate-images`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: id, scenes }),
+      });
+
+      if (!res.ok) {
+        const err = (await res.json()) as { error: string };
+        throw new Error(err.error || "Image generation failed");
+      }
+
+      const data = (await res.json()) as ImageGenResponse;
+      setImagePaths(data.imagePaths);
+      setImageStatus("completed");
+
+      if (data.errors && data.errors.length > 0) {
+        setImageError(data.errors.join("; "));
+      }
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : "Image generation failed");
+      setImageStatus("failed");
+    }
+  }
 
   useEffect(() => {
     if (!jobId || status === "completed" || status === "failed") return;
@@ -83,6 +146,9 @@ export default function GeneratePage() {
     setResult(null);
     setStatus("idle");
     setProgress(0);
+    setImageStatus("idle");
+    setImagePaths([]);
+    setImageError(null);
 
     try {
       const res = await fetch(`${API_URL}/api/generate`, {
@@ -198,7 +264,7 @@ export default function GeneratePage() {
           </button>
         </form>
 
-        {/* Progress Indicator */}
+        {/* Story Progress */}
         {isGenerating && (
           <div className={`glass-card ${styles.progressCard}`}>
             <div className={styles.progressHeader}>
@@ -210,6 +276,20 @@ export default function GeneratePage() {
               <div className={styles.progressFill} style={{ width: `${progress}%` }} />
             </div>
             <p className={styles.progressHint}>{t("generate.progressHint")}</p>
+          </div>
+        )}
+
+        {/* Image Generation Progress */}
+        {imageStatus === "generating" && (
+          <div className={`glass-card ${styles.progressCard}`}>
+            <div className={styles.progressHeader}>
+              <span className={styles.progressDotImage} />
+              <span>{t("generate.imageProgressLabel")}</span>
+            </div>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFillImage} style={{ width: "60%" }} />
+            </div>
+            <p className={styles.progressHint}>{t("generate.imageProgressHint")}</p>
           </div>
         )}
 
@@ -235,8 +315,42 @@ export default function GeneratePage() {
                 <span className={styles.metaBadge}>
                   {result.sahneSayisi} {t("generate.scenes")}
                 </span>
+                {imageStatus === "completed" && (
+                  <span className={`${styles.metaBadge} ${styles.metaBadgeSuccess}`}>
+                    🖼️ {t("generate.imagesReady")}
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Scene Images Grid */}
+            {imagePaths.length > 0 && (
+              <div className={`glass-card ${styles.imagesCard}`}>
+                <h3>🖼️ {t("generate.sceneImages")} ({imagePaths.length})</h3>
+                {imageError && (
+                  <p className={styles.imageWarning}>⚠️ {imageError}</p>
+                )}
+                <div className={styles.imagesGrid}>
+                  {imagePaths.map((imgPath, i) => (
+                    <div key={i} className={styles.imageItem}>
+                      <div className={styles.imageWrapper}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`${API_URL}${imgPath}`}
+                          alt={`Scene ${i + 1}`}
+                          className={styles.sceneImage}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className={styles.imageLabel}>
+                        <span className={styles.imageLabelNum}>{i + 1}</span>
+                        <span>{t("generate.sceneLabel")} {i + 1}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Hikaye */}
             <div className={`glass-card ${styles.storyCard}`}>
