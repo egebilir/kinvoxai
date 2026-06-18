@@ -104,7 +104,17 @@
     "setting": "Setting",
     "visualStyle": "Visual Style",
     "moodProgression": "Mood Progression",
-    "notToDo": "Avoid (Visual Mistakes)"
+    "notToDo": "Avoid (Visual Mistakes)",
+    "videoProgressLabel": "🎬 Generating scene videos...",
+    "videoProgressHint": "Seedance is generating a 5-second clip per scene. This can take a few minutes.",
+    "sceneVideos": "Scene Videos",
+    "videoUnavailable": "Video unavailable",
+    "assembleButton": "Assemble Final Video 🎬",
+    "assembling": "Assembling...",
+    "assembleProgressLabel": "🎞️ Assembling final video...",
+    "assembleProgressHint": "Stitching scene clips together with ffmpeg.",
+    "finalVideo": "Final Video",
+    "downloadVideo": "Download Video"
   },
   "langToggle": {
     "switchTo": "Türkçe'ye geç"

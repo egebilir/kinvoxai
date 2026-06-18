@@ -143,6 +143,23 @@
   transform: scale(1.05);
 }
 
+.videoWrapper {
+  aspect-ratio: 9 / 16;
+}
+
+.videoUnavailable {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  background: var(--bg-elevated);
+}
+
 .imageLabel {
   display: flex;
   align-items: center;

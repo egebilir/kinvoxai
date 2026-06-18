@@ -55,12 +55,14 @@ Kullanıcı bir konu ve stil verecek. Tüm çıktıları TÜRKÇE olarak yaz.
 
 3. SAHNE DAĞILIMI: Tam olarak ${config.sahneSayisi} sahne.
    - Her sahne ${config.sahneUzunluk} kelime, görsel ve detaylı (sahneler_tr için)
-   - Türkçe sahnelerin yanı sıra, her sahnenin İngilizce bir GÖRSEL ÜRETİM
+   - Türkçe sahnelerin yanı sıra, her sahnenin İngilizce bir VİDEO ÜRETİM
      PROMPTU'nu da yaz (sahneler_en) — bu, sahneler_tr'nin çevirisi DEĞİL,
-     bir text-to-image modeli için optimize edilmiş kısa bir komuttur.
+     bir text-to-video modeli (5 saniyelik klip üretir) için optimize
+     edilmiş kısa bir komuttur. Bu bir illüstrasyon değil, hareketli video —
+     "cartoon illustration" gibi ifadeler KULLANMA.
 
-   sahneler_en için KESİN KURALLAR (bunlara uyulmazsa görsel üretim modeli
-   diyagram/şema/çizgi roman paneli üretir, tek bir sahne değil):
+   sahneler_en için KESİN KURALLAR (bunlara uyulmazsa video modeli
+   diyagram/şema/çizgi roman paneli üretir, tek bir akıcı sahne değil):
    - EN FAZLA 2 cümle.
    - SADECE TEK bir görsel odak noktası olsun: bir karakter, bir nesne veya
      bir eylem. Birden fazla nesneyi/odayı/listeyi tarif etme.
@@ -68,15 +70,20 @@ Kullanıcı bir konu ve stil verecek. Tüm çıktıları TÜRKÇE olarak yaz.
      — bunlar modeli diyagram/blueprint üretmeye iter.
    - İsim/nesne listesi yerine FİİL kullan ("character runs through door"
      diye yaz, "door with character nearby" diye yazma).
-   - Şu formatı izle: "[Tek özne, kısa]. [Tek eylem/durum]. Cinematic,
-     dramatic lighting. Cartoon illustration style."
+   - "Smooth motion" ima eden bir eylem seç (yürüme, koşma, dönme, bakma
+     gibi) — durağan bir poz değil.
+   - Şu formatı izle: "A 5-second video scene: [Tek özne, kısa]. [Tek
+     eylem/durum]. Cinematic 720p, natural lighting, smooth motion. No
+     text, no diagrams."
    - Örnek:
      KÖTÜ: "You stand in the kitchen. The open refrigerator light
      illuminates your face. Inside: only empty shelves and a smell. How
      much longer? Your hands tremble. A muffled scream echoes in your ears,
      cartoon illustration, vibrant colors, detailed, animated style"
-     İYİ: "Character stands in dim kitchen. Refrigerator light illuminates
-     panicked face. Cartoon illustration, cinematic horror lighting."
+     İYİ: "A 5-second video scene: character stands in dim kitchen,
+     refrigerator light flickering. Trembling hand slowly reaches for the
+     door. Cinematic 720p, natural lighting, smooth motion. No text, no
+     diagrams."
 
 4. VISUAL STYLE GUIDE (visual_style_guide): Tüm sahnelerde görsel tutarlılığı garanti eden bir İngilizce JSON nesnesi.
    Bunu, hikayeyi ve sahneleri yazdıktan SONRA, onlarla tutarlı olacak şekilde oluştur:
@@ -109,7 +116,7 @@ SADECE geçerli JSON döndür (markdown yok, kod blokları yok):
   "hikaye": "Tam Türkçe hikaye metni",
   "seslendirme": "Türkçe seslendirme metni (konuşma tarzında, dramatik)",
   "sahneler_tr": ["Sahne 1 Türkçe açıklama", "Sahne 2 Türkçe açıklama", ...],
-  "sahneler_en": ["[Single subject]. [One action/state]. Cinematic, dramatic lighting. Cartoon illustration style.", ...]
+  "sahneler_en": ["A 5-second video scene: [Single subject]. [One action/state]. Cinematic 720p, natural lighting, smooth motion. No text, no diagrams.", ...]
 }`;
 }
 

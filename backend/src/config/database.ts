@@ -64,6 +64,12 @@ export function connectDatabase(): void {
   if (!storyColumns.some((col) => col.name === "visual_style_guide")) {
     db.exec("ALTER TABLE stories ADD COLUMN visual_style_guide TEXT");
   }
+  if (!storyColumns.some((col) => col.name === "video_paths")) {
+    db.exec("ALTER TABLE stories ADD COLUMN video_paths TEXT");
+  }
+  if (!storyColumns.some((col) => col.name === "final_video_path")) {
+    db.exec("ALTER TABLE stories ADD COLUMN final_video_path TEXT");
+  }
 
   // Verify connection
   const row = db.prepare("SELECT datetime('now') as time").get() as { time: string };

@@ -104,7 +104,17 @@
     "setting": "Mekan",
     "visualStyle": "Görsel Stil",
     "moodProgression": "Ruh Hali İlerlemesi",
-    "notToDo": "Kaçınılması Gerekenler"
+    "notToDo": "Kaçınılması Gerekenler",
+    "videoProgressLabel": "🎬 Sahne videoları oluşturuluyor...",
+    "videoProgressHint": "Seedance her sahne için 5 saniyelik bir klip oluşturuyor. Bu birkaç dakika sürebilir.",
+    "sceneVideos": "Sahne Videoları",
+    "videoUnavailable": "Video yok",
+    "assembleButton": "Final Videoyu Oluştur 🎬",
+    "assembling": "Birleştiriliyor...",
+    "assembleProgressLabel": "🎞️ Final video birleştiriliyor...",
+    "assembleProgressHint": "Sahne klipleri ffmpeg ile birleştiriliyor.",
+    "finalVideo": "Final Video",
+    "downloadVideo": "Videoyu İndir"
   },
   "langToggle": {
     "switchTo": "Switch to English"

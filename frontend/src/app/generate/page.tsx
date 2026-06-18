@@ -7,6 +7,8 @@ import Link from "next/link";
 
 type JobStatus = "idle" | "queued" | "processing" | "completed" | "failed";
 type ImageStatus = "idle" | "generating" | "completed" | "failed";
+type VideoStatus = "idle" | "generating" | "completed" | "partial" | "failed";
+type AssembleStatus = "idle" | "assembling" | "completed" | "failed";
 
 interface VisualStyleGuide {
   main_character_description: string;
@@ -26,6 +28,8 @@ interface StoryResult {
   sahneler_en: string[];
   imagePaths: string[] | null;
   visualStyleGuide: VisualStyleGuide | null;
+  videoPaths: (string | null)[] | null;
+  finalVideoPath: string | null;
   style: string;
   duration: string;
   sahneSayisi: number;
@@ -44,6 +48,21 @@ interface ImageGenResponse {
   status: string;
   imagePaths: string[];
   errors?: string[];
+}
+
+interface VideoGenResponse {
+  jobId: string;
+  status: string;
+  videoPaths: (string | null)[];
+  failedCount?: number;
+}
+
+interface AssembleVideoResponse {
+  jobId: string;
+  status: string;
+  finalVideoPath: string;
+  clipsUsed: number;
+  clipsSkipped: number;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -69,6 +88,16 @@ export default function GeneratePage() {
   // Visual style guide UI state
   const [styleGuideExpanded, setStyleGuideExpanded] = useState(true);
 
+  // Video generation state
+  const [videoStatus, setVideoStatus] = useState<VideoStatus>("idle");
+  const [videoPaths, setVideoPaths] = useState<(string | null)[]>([]);
+  const [videoError, setVideoError] = useState<string | null>(null);
+
+  // Final video assembly state
+  const [assembleStatus, setAssembleStatus] = useState<AssembleStatus>("idle");
+  const [finalVideoPath, setFinalVideoPath] = useState<string | null>(null);
+  const [assembleError, setAssembleError] = useState<string | null>(null);
+
   const pollStatus = useCallback(async (id: string) => {
     try {
       const res = await fetch(`${API_URL}/api/status/${id}`);
@@ -83,6 +112,15 @@ export default function GeneratePage() {
         if (data.result.imagePaths && data.result.imagePaths.length > 0) {
           setImagePaths(data.result.imagePaths);
           setImageStatus("completed");
+        }
+        // If video clips already exist (from a previous run), use them
+        if (data.result.videoPaths && data.result.videoPaths.length > 0) {
+          setVideoPaths(data.result.videoPaths);
+          setVideoStatus(data.result.videoPaths.every((p) => p !== null) ? "completed" : "partial");
+        }
+        if (data.result.finalVideoPath) {
+          setFinalVideoPath(data.result.finalVideoPath);
+          setAssembleStatus("completed");
         }
         return true;
       }
@@ -110,6 +148,21 @@ export default function GeneratePage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, result, jobId, imageStatus]);
+
+  // Auto-trigger video clip generation after story completes
+  useEffect(() => {
+    if (
+      status === "completed" &&
+      result &&
+      jobId &&
+      videoStatus === "idle" &&
+      result.sahneler_en.length > 0 &&
+      (!result.videoPaths || result.videoPaths.length === 0)
+    ) {
+      generateVideosForStory(jobId, result.sahneler_en);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, result, jobId, videoStatus]);
 
   async function generateImagesForStory(id: string, scenes: string[]): Promise<void> {
     setImageStatus("generating");
@@ -140,6 +193,62 @@ export default function GeneratePage() {
     }
   }
 
+  async function generateVideosForStory(id: string, scenes: string[]): Promise<void> {
+    setVideoStatus("generating");
+    setVideoError(null);
+
+    try {
+      const res = await fetch(`${API_URL}/api/generate-videos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: id, scenes }),
+      });
+
+      if (!res.ok) {
+        const err = (await res.json()) as { error: string };
+        throw new Error(err.error || "Video generation failed");
+      }
+
+      const data = (await res.json()) as VideoGenResponse;
+      setVideoPaths(data.videoPaths);
+      setVideoStatus(data.status === "videos_generated" ? "completed" : "partial");
+
+      if (data.failedCount) {
+        setVideoError(`${data.failedCount} scene${data.failedCount > 1 ? "s" : ""} failed to generate`);
+      }
+    } catch (err) {
+      setVideoError(err instanceof Error ? err.message : "Video generation failed");
+      setVideoStatus("failed");
+    }
+  }
+
+  async function assembleFinalVideo(): Promise<void> {
+    if (!jobId) return;
+
+    setAssembleStatus("assembling");
+    setAssembleError(null);
+
+    try {
+      const res = await fetch(`${API_URL}/api/assemble-videos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+
+      if (!res.ok) {
+        const err = (await res.json()) as { error: string };
+        throw new Error(err.error || "Video assembly failed");
+      }
+
+      const data = (await res.json()) as AssembleVideoResponse;
+      setFinalVideoPath(data.finalVideoPath);
+      setAssembleStatus("completed");
+    } catch (err) {
+      setAssembleError(err instanceof Error ? err.message : "Video assembly failed");
+      setAssembleStatus("failed");
+    }
+  }
+
   useEffect(() => {
     if (!jobId || status === "completed" || status === "failed") return;
 
@@ -163,6 +272,12 @@ export default function GeneratePage() {
     setImageStatus("idle");
     setImagePaths([]);
     setImageError(null);
+    setVideoStatus("idle");
+    setVideoPaths([]);
+    setVideoError(null);
+    setAssembleStatus("idle");
+    setFinalVideoPath(null);
+    setAssembleError(null);
 
     try {
       const res = await fetch(`${API_URL}/api/generate`, {
@@ -307,6 +422,34 @@ export default function GeneratePage() {
           </div>
         )}
 
+        {/* Video Clip Generation Progress */}
+        {videoStatus === "generating" && (
+          <div className={`glass-card ${styles.progressCard}`}>
+            <div className={styles.progressHeader}>
+              <span className={styles.progressDotImage} />
+              <span>{t("generate.videoProgressLabel")}</span>
+            </div>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFillImage} style={{ width: "60%" }} />
+            </div>
+            <p className={styles.progressHint}>{t("generate.videoProgressHint")}</p>
+          </div>
+        )}
+
+        {/* Video Assembly Progress */}
+        {assembleStatus === "assembling" && (
+          <div className={`glass-card ${styles.progressCard}`}>
+            <div className={styles.progressHeader}>
+              <span className={styles.progressDotImage} />
+              <span>{t("generate.assembleProgressLabel")}</span>
+            </div>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFillImage} style={{ width: "80%" }} />
+            </div>
+            <p className={styles.progressHint}>{t("generate.assembleProgressHint")}</p>
+          </div>
+        )}
+
         {/* Error State */}
         {error && (
           <div className={`glass-card ${styles.errorCard}`}>
@@ -432,6 +575,72 @@ export default function GeneratePage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Scene Video Clips Grid */}
+            {videoPaths.length > 0 && (
+              <div className={`glass-card ${styles.imagesCard}`}>
+                <h3>🎬 {t("generate.sceneVideos")} ({videoPaths.length})</h3>
+                {videoError && <p className={styles.imageWarning}>⚠️ {videoError}</p>}
+                <div className={styles.imagesGrid}>
+                  {videoPaths.map((vidPath, i) => (
+                    <div key={i} className={styles.imageItem}>
+                      <div className={`${styles.imageWrapper} ${styles.videoWrapper}`}>
+                        {vidPath ? (
+                          <video
+                            src={`${API_URL}${vidPath}`}
+                            className={styles.sceneImage}
+                            controls
+                            loop
+                            muted
+                            playsInline
+                          />
+                        ) : (
+                          <div className={styles.videoUnavailable}>
+                            <span>{t("generate.videoUnavailable")}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.imageLabel}>
+                        <span className={styles.imageLabelNum}>{i + 1}</span>
+                        <span>{t("generate.sceneLabel")} {i + 1}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {(videoStatus === "completed" || videoStatus === "partial") && assembleStatus !== "completed" && (
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={assembleFinalVideo}
+                    disabled={assembleStatus === "assembling"}
+                    style={{ marginTop: "20px" }}
+                  >
+                    {assembleStatus === "assembling"
+                      ? t("generate.assembling")
+                      : t("generate.assembleButton")}
+                  </button>
+                )}
+                {assembleError && <p className={styles.imageWarning}>⚠️ {assembleError}</p>}
+              </div>
+            )}
+
+            {/* Final Assembled Video */}
+            {finalVideoPath && (
+              <div className={`glass-card ${styles.imagesCard}`}>
+                <h3>✅ {t("generate.finalVideo")}</h3>
+                <video
+                  src={`${API_URL}${finalVideoPath}`}
+                  controls
+                  style={{ width: "100%", maxWidth: "360px", borderRadius: "var(--radius-sm)" }}
+                />
+                <div style={{ marginTop: "16px" }}>
+                  <a href={`${API_URL}${finalVideoPath}`} download className="btn-primary">
+                    ⬇️ {t("generate.downloadVideo")}
+                  </a>
                 </div>
               </div>
             )}
