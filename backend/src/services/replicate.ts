@@ -15,6 +15,46 @@ interface ReplicatePrediction {
   error: string | null;
 }
 
+interface ReplicateModel {
+  latest_version?: { id: string };
+}
+
+// stability-ai/sdxl is a community model, not one of Replicate's "official"
+// models, so it doesn't support the /v1/models/{owner}/{name}/predictions
+// shorthand (that 404s). We have to resolve its current version id and use
+// the general /v1/predictions endpoint instead. Cache the resolved id
+// (shared across the concurrent per-scene calls) so we only look it up once.
+let cachedVersionId: Promise<string> | null = null;
+
+async function getLatestVersionId(apiToken: string): Promise<string> {
+  if (!cachedVersionId) {
+    cachedVersionId = (async () => {
+      const response = await fetch(`https://api.replicate.com/v1/models/${REPLICATE_MODEL}`, {
+        headers: { Authorization: `Bearer ${apiToken}` },
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`Replicate API error (${response.status}) resolving model version: ${errBody}`);
+      }
+
+      const model = (await response.json()) as ReplicateModel;
+      const versionId = model.latest_version?.id;
+      if (!versionId) {
+        throw new Error(`Replicate model ${REPLICATE_MODEL} has no latest_version`);
+      }
+      return versionId;
+    })();
+
+    // Don't cache a failed lookup — let the next call retry.
+    cachedVersionId.catch(() => {
+      cachedVersionId = null;
+    });
+  }
+
+  return cachedVersionId;
+}
+
 function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -57,7 +97,9 @@ function getApiToken(): string {
 }
 
 async function createPrediction(prompt: string, apiToken: string): Promise<ReplicatePrediction> {
-  const response = await fetch(`https://api.replicate.com/v1/models/${REPLICATE_MODEL}/predictions`, {
+  const versionId = await getLatestVersionId(apiToken);
+
+  const response = await fetch("https://api.replicate.com/v1/predictions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiToken}`,
@@ -67,6 +109,7 @@ async function createPrediction(prompt: string, apiToken: string): Promise<Repli
       Prefer: "wait",
     },
     body: JSON.stringify({
+      version: versionId,
       input: {
         prompt,
         width: 1024,
