@@ -80,7 +80,7 @@ export async function generateStory(
   const systemPrompt = buildSystemPrompt(style, duration);
 
   const message = await client.messages.create({
-    model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.CLAUDE_MODEL || "claude-3-5-haiku-20241022",
     max_tokens: 4096,
     system: systemPrompt,
     messages: [
