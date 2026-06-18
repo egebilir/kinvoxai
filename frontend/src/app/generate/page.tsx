@@ -8,6 +8,16 @@ import Link from "next/link";
 type JobStatus = "idle" | "queued" | "processing" | "completed" | "failed";
 type ImageStatus = "idle" | "generating" | "completed" | "failed";
 
+interface VisualStyleGuide {
+  main_character_description: string;
+  secondary_characters: string;
+  setting_description: string;
+  color_palette: string[];
+  visual_style: string;
+  mood_progression: string;
+  NOT_TO_DO: string[];
+}
+
 interface StoryResult {
   baslik: string;
   hikaye: string;
@@ -15,6 +25,7 @@ interface StoryResult {
   sahneler_tr: string[];
   sahneler_en: string[];
   imagePaths: string[] | null;
+  visualStyleGuide: VisualStyleGuide | null;
   style: string;
   duration: string;
   sahneSayisi: number;
@@ -54,6 +65,9 @@ export default function GeneratePage() {
   const [imageStatus, setImageStatus] = useState<ImageStatus>("idle");
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  // Visual style guide UI state
+  const [styleGuideExpanded, setStyleGuideExpanded] = useState(true);
 
   const pollStatus = useCallback(async (id: string) => {
     try {
@@ -322,6 +336,76 @@ export default function GeneratePage() {
                 )}
               </div>
             </div>
+
+            {/* Visual Style Guide */}
+            {result.visualStyleGuide && (
+              <div className={`glass-card ${styles.styleGuideCard}`}>
+                <button
+                  type="button"
+                  className={styles.styleGuideToggle}
+                  onClick={() => setStyleGuideExpanded((prev) => !prev)}
+                >
+                  <h3>🎨 {t("generate.visualStyleGuide")}</h3>
+                  <span className={styles.styleGuideChevron}>
+                    {styleGuideExpanded ? "▾" : "▸"}
+                  </span>
+                </button>
+
+                {styleGuideExpanded && (
+                  <div className={styles.styleGuideBody}>
+                    <div className={styles.styleGuideField}>
+                      <span className={styles.styleGuideLabel}>{t("generate.colorPalette")}</span>
+                      <div className={styles.colorPalette}>
+                        {result.visualStyleGuide.color_palette.map((hex, i) => (
+                          <div key={i} className={styles.colorSwatch} title={hex}>
+                            <div className={styles.colorSwatchBox} style={{ background: hex }} />
+                            <span className={styles.colorSwatchHex}>{hex}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={styles.styleGuideField}>
+                      <span className={styles.styleGuideLabel}>{t("generate.mainCharacter")}</span>
+                      <p>{result.visualStyleGuide.main_character_description}</p>
+                    </div>
+
+                    {result.visualStyleGuide.secondary_characters && (
+                      <div className={styles.styleGuideField}>
+                        <span className={styles.styleGuideLabel}>{t("generate.secondaryCharacters")}</span>
+                        <p>{result.visualStyleGuide.secondary_characters}</p>
+                      </div>
+                    )}
+
+                    <div className={styles.styleGuideField}>
+                      <span className={styles.styleGuideLabel}>{t("generate.setting")}</span>
+                      <p>{result.visualStyleGuide.setting_description}</p>
+                    </div>
+
+                    <div className={styles.styleGuideField}>
+                      <span className={styles.styleGuideLabel}>{t("generate.visualStyle")}</span>
+                      <p>{result.visualStyleGuide.visual_style}</p>
+                    </div>
+
+                    <div className={styles.styleGuideField}>
+                      <span className={styles.styleGuideLabel}>{t("generate.moodProgression")}</span>
+                      <p>{result.visualStyleGuide.mood_progression}</p>
+                    </div>
+
+                    {result.visualStyleGuide.NOT_TO_DO.length > 0 && (
+                      <div className={styles.styleGuideField}>
+                        <span className={styles.styleGuideLabel}>{t("generate.notToDo")}</span>
+                        <ul className={styles.notToDoList}>
+                          {result.visualStyleGuide.NOT_TO_DO.map((item, i) => (
+                            <li key={i}>☐ {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Scene Images Grid */}
             {imagePaths.length > 0 && (

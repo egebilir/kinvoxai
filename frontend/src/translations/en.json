@@ -96,7 +96,15 @@
     "imageProgressLabel": "🖼️ Generating scene images...",
     "imageProgressHint": "DALL-E 3 is creating cartoon illustrations for each scene. This may take 1-2 minutes.",
     "sceneImages": "Scene Images",
-    "imagesReady": "Images Ready"
+    "imagesReady": "Images Ready",
+    "visualStyleGuide": "Visual Style Guide",
+    "colorPalette": "Color Palette",
+    "mainCharacter": "Main Character",
+    "secondaryCharacters": "Secondary Characters",
+    "setting": "Setting",
+    "visualStyle": "Visual Style",
+    "moodProgression": "Mood Progression",
+    "notToDo": "Avoid (Visual Mistakes)"
   },
   "langToggle": {
     "switchTo": "Türkçe'ye geç"

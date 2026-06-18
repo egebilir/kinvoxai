@@ -168,6 +168,36 @@
 /* Scene label */
 .sceneLabel { font-size: 0.7rem; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 1px; }
 
+/* Visual Style Guide */
+.styleGuideCard { padding: 28px; border-left: 3px solid #a855f7; }
+
+.styleGuideToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text-primary);
+}
+.styleGuideToggle h3 { font-size: 1rem; font-weight: 700; }
+.styleGuideChevron { color: var(--text-muted); font-size: 0.9rem; }
+
+.styleGuideBody { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
+.styleGuideField { display: flex; flex-direction: column; gap: 6px; }
+.styleGuideLabel { font-size: 0.7rem; font-weight: 700; color: #a855f7; text-transform: uppercase; letter-spacing: 0.5px; }
+.styleGuideField p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; }
+
+.colorPalette { display: flex; gap: 14px; flex-wrap: wrap; }
+.colorSwatch { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.colorSwatchBox { width: 44px; height: 44px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+.colorSwatchHex { font-size: 0.65rem; color: var(--text-muted); font-family: monospace; }
+
+.notToDoList { display: flex; flex-direction: column; gap: 6px; list-style: none; }
+.notToDoList li { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+
 @media (max-width: 768px) {
   .imagesGrid { grid-template-columns: repeat(2, 1fr); }
   .formRow { grid-template-columns: 1fr; }

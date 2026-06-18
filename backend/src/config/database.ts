@@ -46,6 +46,7 @@ export function connectDatabase(): void {
       sahneler_tr TEXT NOT NULL,
       sahneler_en TEXT NOT NULL,
       image_paths TEXT,
+      visual_style_guide TEXT,
       prompt TEXT NOT NULL,
       style TEXT NOT NULL,
       duration TEXT NOT NULL,
@@ -55,10 +56,13 @@ export function connectDatabase(): void {
     CREATE INDEX IF NOT EXISTS idx_stories_job_id ON stories(job_id);
   `);
 
-  // Migrate: add image_paths column for databases created before this field existed
+  // Migrate: add columns for databases created before these fields existed
   const storyColumns = db.prepare("PRAGMA table_info(stories)").all() as { name: string }[];
   if (!storyColumns.some((col) => col.name === "image_paths")) {
     db.exec("ALTER TABLE stories ADD COLUMN image_paths TEXT");
+  }
+  if (!storyColumns.some((col) => col.name === "visual_style_guide")) {
+    db.exec("ALTER TABLE stories ADD COLUMN visual_style_guide TEXT");
   }
 
   // Verify connection

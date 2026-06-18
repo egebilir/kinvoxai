@@ -1,5 +1,5 @@
 import { getJob, updateJobStatus } from "../config/queue";
-import { generateStory } from "../services/claude";
+import { generateStory, type VisualStyleGuide } from "../services/claude";
 import { getDb } from "../config/database";
 
 interface JobOptions {
@@ -14,6 +14,7 @@ function saveStory(
   seslendirme: string,
   sahnelerTr: string[],
   sahnelerEn: string[],
+  visualStyleGuide: VisualStyleGuide,
   prompt: string,
   style: string,
   duration: string
@@ -21,8 +22,8 @@ function saveStory(
   const db = getDb();
   db.prepare(`
     INSERT OR REPLACE INTO stories
-      (job_id, baslik, hikaye, seslendirme, sahneler_tr, sahneler_en, prompt, style, duration, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      (job_id, baslik, hikaye, seslendirme, sahneler_tr, sahneler_en, visual_style_guide, prompt, style, duration, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
   `).run(
     jobId,
     baslik,
@@ -30,6 +31,7 @@ function saveStory(
     seslendirme,
     JSON.stringify(sahnelerTr),
     JSON.stringify(sahnelerEn),
+    JSON.stringify(visualStyleGuide),
     prompt,
     style,
     duration
@@ -68,6 +70,7 @@ async function processJob(jobId: string): Promise<void> {
       result.seslendirme,
       result.sahneler_tr,
       result.sahneler_en,
+      result.visual_style_guide,
       job.prompt,
       style,
       duration

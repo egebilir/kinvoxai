@@ -59,18 +59,47 @@ Kullanıcı bir konu ve stil verecek. Tüm çıktıları TÜRKÇE olarak yaz.
    - Türkçe sahnelerin yanı sıra, her sahnenin İngilizce çevirisini de yaz
    - İngilizce sahnelerin sonuna şunu ekle: ", cartoon illustration, vibrant colors, detailed, animated style"
 
+4. VISUAL STYLE GUIDE (visual_style_guide): Tüm sahnelerde görsel tutarlılığı garanti eden bir İngilizce JSON nesnesi.
+   Bunu, hikayeyi ve sahneleri yazdıktan SONRA, onlarla tutarlı olacak şekilde oluştur:
+   - Ana karakter tüm 6 sahnede TIPATIP AYNI görünmeli (yaş, görünüm, kıyafet, ifade)
+   - Mekan coğrafi/zamansal olarak tutarlı olmalı
+   - Renk paleti tüm sahnelerde aynı kalmalı
+   - Atmosfer/duygu mantıklı bir şekilde ilerlemeli (sahne 1'den son sahneye)
+
+   Sonra, HER İngilizce sahne açıklamasının BAŞINA bu rehbere tek satırlık bir referans ekle, asıl sahne açıklamasından önce:
+   "Visual guide: [ana karakter + anahtar mekan + ruh hali özeti]. [orijinal sahne açıklaması, cartoon illustration, vibrant colors, detailed, animated style]"
+
 STİL: ${styleGuide}
 SÜRE: ${config.label}
 
 YANIT FORMATI:
 SADECE geçerli JSON döndür (markdown yok, kod blokları yok):
 {
+  "visual_style_guide": {
+    "main_character_description": "Detailed English description: age, appearance, clothing, consistent expression throughout",
+    "secondary_characters": "If any, describe once in English. Example: 'Zombie features: gray skin, hollow eyes, tattered clothes'. Empty string if none.",
+    "setting_description": "Primary location, environment details, time of day progression (in English)",
+    "color_palette": ["#HEX1", "#HEX2", "#HEX3", "#HEX4", "#HEX5"],
+    "visual_style": "cartoon illustration, [specific art direction], consistent line weight, [mood adjectives]",
+    "mood_progression": "Scene 1-2: [mood], Scene 3-4: [mood], Scene 5-6: [mood]",
+    "NOT_TO_DO": ["List of visual mistakes to avoid across all scenes, in English"]
+  },
   "baslik": "Türkçe hikaye başlığı",
   "hikaye": "Tam Türkçe hikaye metni",
   "seslendirme": "Türkçe seslendirme metni (konuşma tarzında, dramatik)",
   "sahneler_tr": ["Sahne 1 Türkçe açıklama", "Sahne 2 Türkçe açıklama", ...],
-  "sahneler_en": ["Scene 1 English description, cartoon illustration, vibrant colors, detailed, animated style", ...]
+  "sahneler_en": ["Visual guide: [character + setting + mood summary]. Scene 1 English description, cartoon illustration, vibrant colors, detailed, animated style", ...]
 }`;
+}
+
+export interface VisualStyleGuide {
+  main_character_description: string;
+  secondary_characters: string;
+  setting_description: string;
+  color_palette: string[];
+  visual_style: string;
+  mood_progression: string;
+  NOT_TO_DO: string[];
 }
 
 export interface StoryResult {
@@ -79,6 +108,7 @@ export interface StoryResult {
   seslendirme: string;
   sahneler_tr: string[];
   sahneler_en: string[];
+  visual_style_guide: VisualStyleGuide;
 }
 
 export async function generateStory(
@@ -129,7 +159,10 @@ export async function generateStory(
     !parsed.hikaye ||
     !parsed.seslendirme ||
     !Array.isArray(parsed.sahneler_tr) ||
-    !Array.isArray(parsed.sahneler_en)
+    !Array.isArray(parsed.sahneler_en) ||
+    !parsed.visual_style_guide ||
+    !parsed.visual_style_guide.main_character_description ||
+    !Array.isArray(parsed.visual_style_guide.color_palette)
   ) {
     throw new Error("Invalid story structure from Claude — missing required fields");
   }

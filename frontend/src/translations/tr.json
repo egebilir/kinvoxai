@@ -96,7 +96,15 @@
     "imageProgressLabel": "🖼️ Sahne görselleri oluşturuluyor...",
     "imageProgressHint": "DALL-E 3 her sahne için karikatür çizimler oluşturuyor. Bu 1-2 dakika sürebilir.",
     "sceneImages": "Sahne Görselleri",
-    "imagesReady": "Görseller Hazır"
+    "imagesReady": "Görseller Hazır",
+    "visualStyleGuide": "Görsel Stil Rehberi",
+    "colorPalette": "Renk Paleti",
+    "mainCharacter": "Ana Karakter",
+    "secondaryCharacters": "İkincil Karakterler",
+    "setting": "Mekan",
+    "visualStyle": "Görsel Stil",
+    "moodProgression": "Ruh Hali İlerlemesi",
+    "notToDo": "Kaçınılması Gerekenler"
   },
   "langToggle": {
     "switchTo": "Switch to English"
