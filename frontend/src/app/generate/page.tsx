@@ -8,12 +8,14 @@ import Link from "next/link";
 type JobStatus = "idle" | "queued" | "processing" | "completed" | "failed";
 
 interface StoryResult {
-  title: string;
-  story: string;
-  scenes: string[];
+  baslik: string;
+  hikaye: string;
+  seslendirme: string;
+  sahneler_tr: string[];
+  sahneler_en: string[];
   style: string;
   duration: string;
-  sceneCount: number;
+  sahneSayisi: number;
 }
 
 interface StatusResponse {
@@ -222,42 +224,60 @@ export default function GeneratePage() {
         {/* Result */}
         {result && (
           <div className={styles.resultSection}>
+            {/* Header */}
             <div className={`glass-card ${styles.resultHeader}`}>
-              <h2 className={styles.storyTitle}>{result.title}</h2>
+              <h2 className={styles.storyTitle}>{result.baslik}</h2>
               <div className={styles.resultMeta}>
                 <span className={styles.metaBadge}>{result.style}</span>
                 <span className={styles.metaBadge}>
                   {result.duration === "short" ? "TikTok" : "YouTube"}
                 </span>
                 <span className={styles.metaBadge}>
-                  {result.sceneCount} {t("generate.scenes")}
+                  {result.sahneSayisi} {t("generate.scenes")}
                 </span>
               </div>
             </div>
 
+            {/* Hikaye */}
             <div className={`glass-card ${styles.storyCard}`}>
-              <h3>{t("generate.fullStory")}</h3>
+              <h3>📖 {t("generate.hikaye")}</h3>
               <div className={styles.storyText}>
-                {result.story.split("---").map((segment, i) => (
-                  <div key={i} className={styles.sceneBlock}>
-                    {i > 0 && <div className={styles.sceneDivider} />}
-                    <span className={styles.sceneLabel}>
-                      {t("generate.sceneLabel")} {i + 1}
-                    </span>
-                    <p>{segment.trim()}</p>
+                <p>{result.hikaye}</p>
+              </div>
+            </div>
+
+            {/* Seslendirme */}
+            <div className={`glass-card ${styles.voiceoverCard}`}>
+              <h3>🎙️ {t("generate.seslendirme")}</h3>
+              <div className={styles.voiceoverText}>
+                <p>{result.seslendirme}</p>
+              </div>
+            </div>
+
+            {/* Sahneler TR */}
+            <div className={`glass-card ${styles.scenesCard}`}>
+              <h3>
+                🇹🇷 {t("generate.sahnelerTr")} ({result.sahneler_tr.length})
+              </h3>
+              <div className={styles.scenesGrid}>
+                {result.sahneler_tr.map((scene, i) => (
+                  <div key={i} className={styles.sceneItem}>
+                    <div className={styles.sceneNumber}>{i + 1}</div>
+                    <p>{scene}</p>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Sahneler EN */}
             <div className={`glass-card ${styles.scenesCard}`}>
               <h3>
-                {t("generate.sceneBreakdown")} ({result.scenes.length})
+                🇬🇧 {t("generate.sahnelerEn")} ({result.sahneler_en.length})
               </h3>
               <div className={styles.scenesGrid}>
-                {result.scenes.map((scene, i) => (
-                  <div key={i} className={styles.sceneItem}>
-                    <div className={styles.sceneNumber}>{i + 1}</div>
+                {result.sahneler_en.map((scene, i) => (
+                  <div key={i} className={`${styles.sceneItem} ${styles.sceneItemEn}`}>
+                    <div className={styles.sceneNumberEn}>{i + 1}</div>
                     <p>{scene}</p>
                   </div>
                 ))}

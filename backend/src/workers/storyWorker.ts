@@ -9,18 +9,31 @@ interface JobOptions {
 
 function saveStory(
   jobId: string,
-  title: string,
-  story: string,
-  scenes: string[],
+  baslik: string,
+  hikaye: string,
+  seslendirme: string,
+  sahnelerTr: string[],
+  sahnelerEn: string[],
   prompt: string,
   style: string,
   duration: string
 ): void {
   const db = getDb();
   db.prepare(`
-    INSERT OR REPLACE INTO stories (job_id, title, story, scenes, prompt, style, duration, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-  `).run(jobId, title, story, JSON.stringify(scenes), prompt, style, duration);
+    INSERT OR REPLACE INTO stories
+      (job_id, baslik, hikaye, seslendirme, sahneler_tr, sahneler_en, prompt, style, duration, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+  `).run(
+    jobId,
+    baslik,
+    hikaye,
+    seslendirme,
+    JSON.stringify(sahnelerTr),
+    JSON.stringify(sahnelerEn),
+    prompt,
+    style,
+    duration
+  );
 }
 
 async function processJob(jobId: string): Promise<void> {
@@ -48,11 +61,21 @@ async function processJob(jobId: string): Promise<void> {
     updateJobStatus(jobId, "processing", 80);
 
     // Save story to stories table
-    saveStory(jobId, result.title, result.story, result.scenes, job.prompt, style, duration);
+    saveStory(
+      jobId,
+      result.baslik,
+      result.hikaye,
+      result.seslendirme,
+      result.sahneler_tr,
+      result.sahneler_en,
+      job.prompt,
+      style,
+      duration
+    );
 
     // Mark job as completed with result
     updateJobStatus(jobId, "completed", 100, JSON.stringify(result));
-    console.log(`✅ Job ${jobId} completed: "${result.title}" (${result.scenes.length} scenes)`);
+    console.log(`✅ Job ${jobId} completed: "${result.baslik}" (${result.sahneler_tr.length} sahne)`);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     updateJobStatus(jobId, "failed", 0, undefined, message);

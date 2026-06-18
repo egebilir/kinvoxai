@@ -5,9 +5,11 @@ import { getDb } from "../config/database";
 export const statusRouter = Router();
 
 interface StoryRow {
-  title: string;
-  story: string;
-  scenes: string;
+  baslik: string;
+  hikaye: string;
+  seslendirme: string;
+  sahneler_tr: string;
+  sahneler_en: string;
   style: string;
   duration: string;
   created_at: string;
@@ -40,13 +42,18 @@ statusRouter.get("/:jobId", (req: Request<{ jobId: string }>, res: Response) => 
       const story = db.prepare("SELECT * FROM stories WHERE job_id = ?").get(jobId) as StoryRow | undefined;
 
       if (story) {
+        const sahnelerTr = JSON.parse(story.sahneler_tr) as string[];
+        const sahnelerEn = JSON.parse(story.sahneler_en) as string[];
+
         response.result = {
-          title: story.title,
-          story: story.story,
-          scenes: JSON.parse(story.scenes) as string[],
+          baslik: story.baslik,
+          hikaye: story.hikaye,
+          seslendirme: story.seslendirme,
+          sahneler_tr: sahnelerTr,
+          sahneler_en: sahnelerEn,
           style: story.style,
           duration: story.duration,
-          sceneCount: (JSON.parse(story.scenes) as string[]).length,
+          sahneSayisi: sahnelerTr.length,
           completedAt: story.created_at,
         };
       }

@@ -75,15 +75,15 @@
 .resultMeta { display: flex; gap: 8px; flex-wrap: wrap; }
 .metaBadge { padding: 4px 12px; border-radius: 100px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: capitalize; }
 
-/* Story Card */
+/* Story Card (Hikaye) */
 .storyCard { padding: 28px; }
 .storyCard h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
-.storyText { display: flex; flex-direction: column; gap: 4px; }
+.storyText p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; white-space: pre-line; }
 
-.sceneBlock { margin-bottom: 4px; }
-.sceneBlock p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; }
-.sceneDivider { width: 60px; height: 1px; background: var(--border-accent); margin: 20px 0; }
-.sceneLabel { font-size: 0.7rem; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+/* Voiceover Card (Seslendirme) */
+.voiceoverCard { padding: 28px; border-left: 3px solid var(--accent-primary); }
+.voiceoverCard h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+.voiceoverText p { color: var(--text-primary); font-size: 0.95rem; line-height: 1.9; white-space: pre-line; font-style: italic; }
 
 /* Scenes Grid */
 .scenesCard { padding: 28px; }
@@ -92,3 +92,8 @@
 .sceneItem { display: flex; gap: 14px; align-items: flex-start; padding: 14px; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
 .sceneNumber { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--accent-gradient); color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
 .sceneItem p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; }
+
+/* English scene variant */
+.sceneItemEn { border-color: rgba(59, 130, 246, 0.2); background: rgba(59, 130, 246, 0.03); }
+.sceneNumberEn { min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+

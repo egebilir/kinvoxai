@@ -68,9 +68,9 @@
   },
   "generate": {
     "title": "Generate Story",
-    "subtitle": "Create AI-powered stories for video content.",
+    "subtitle": "Create AI-powered Turkish stories for video content.",
     "promptLabel": "Story Prompt",
-    "promptPlaceholder": "e.g., zombie apocalypse survival in a shopping mall...",
+    "promptPlaceholder": "e.g., Zombi kıyameti nasıl katılır?...",
     "durationLabel": "Duration",
     "durationShort": "🎵 TikTok (1-1.5 min)",
     "durationLong": "🎬 YouTube (5-7 min)",
@@ -85,11 +85,12 @@
     "submit": "Generate Story ✨",
     "generating": "Generating... Please wait",
     "progressLabel": "Generating your story...",
-    "progressHint": "Claude is crafting your narrative. This usually takes 15-30 seconds.",
+    "progressHint": "Claude is crafting your narrative in Turkish. This usually takes 15-30 seconds.",
     "errorTitle": "Generation Failed",
-    "fullStory": "Full Story",
-    "sceneBreakdown": "Scene Breakdown",
-    "sceneLabel": "Scene",
+    "hikaye": "Story (Hikaye)",
+    "seslendirme": "Voiceover Script (Seslendirme)",
+    "sahnelerTr": "Scenes — Turkish",
+    "sahnelerEn": "Scenes — English (for DALL-E)",
     "scenes": "scenes"
   },
   "langToggle": {
