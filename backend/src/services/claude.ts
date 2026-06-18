@@ -54,20 +54,41 @@ Kullanıcı bir konu ve stil verecek. Tüm çıktıları TÜRKÇE olarak yaz.
    - Dinleyiciyi içine çeken bir ton
 
 3. SAHNE DAĞILIMI: Tam olarak ${config.sahneSayisi} sahne.
-   - Her sahne ${config.sahneUzunluk} kelime, görsel ve detaylı
-   - Her sahne bir DALL-E görsel üretimi için yeterince betimleyici olmalı
-   - Türkçe sahnelerin yanı sıra, her sahnenin İngilizce çevirisini de yaz
-   - İngilizce sahnelerin sonuna şunu ekle: ", cartoon illustration, vibrant colors, detailed, animated style"
+   - Her sahne ${config.sahneUzunluk} kelime, görsel ve detaylı (sahneler_tr için)
+   - Türkçe sahnelerin yanı sıra, her sahnenin İngilizce bir GÖRSEL ÜRETİM
+     PROMPTU'nu da yaz (sahneler_en) — bu, sahneler_tr'nin çevirisi DEĞİL,
+     bir text-to-image modeli için optimize edilmiş kısa bir komuttur.
+
+   sahneler_en için KESİN KURALLAR (bunlara uyulmazsa görsel üretim modeli
+   diyagram/şema/çizgi roman paneli üretir, tek bir sahne değil):
+   - EN FAZLA 2 cümle.
+   - SADECE TEK bir görsel odak noktası olsun: bir karakter, bir nesne veya
+     bir eylem. Birden fazla nesneyi/odayı/listeyi tarif etme.
+   - Metin, yazı, etiket, harita, şema, "sahne dökümü" gibi ifadeler KULLANMA
+     — bunlar modeli diyagram/blueprint üretmeye iter.
+   - İsim/nesne listesi yerine FİİL kullan ("character runs through door"
+     diye yaz, "door with character nearby" diye yazma).
+   - Şu formatı izle: "[Tek özne, kısa]. [Tek eylem/durum]. Cinematic,
+     dramatic lighting. Cartoon illustration style."
+   - Örnek:
+     KÖTÜ: "You stand in the kitchen. The open refrigerator light
+     illuminates your face. Inside: only empty shelves and a smell. How
+     much longer? Your hands tremble. A muffled scream echoes in your ears,
+     cartoon illustration, vibrant colors, detailed, animated style"
+     İYİ: "Character stands in dim kitchen. Refrigerator light illuminates
+     panicked face. Cartoon illustration, cinematic horror lighting."
 
 4. VISUAL STYLE GUIDE (visual_style_guide): Tüm sahnelerde görsel tutarlılığı garanti eden bir İngilizce JSON nesnesi.
    Bunu, hikayeyi ve sahneleri yazdıktan SONRA, onlarla tutarlı olacak şekilde oluştur:
-   - Ana karakter tüm 6 sahnede TIPATIP AYNI görünmeli (yaş, görünüm, kıyafet, ifade)
+   - Ana karakter tüm sahnelerde TIPATIP AYNI görünmeli (yaş, görünüm, kıyafet, ifade)
    - Mekan coğrafi/zamansal olarak tutarlı olmalı
    - Renk paleti tüm sahnelerde aynı kalmalı
    - Atmosfer/duygu mantıklı bir şekilde ilerlemeli (sahne 1'den son sahneye)
 
-   Sonra, HER İngilizce sahne açıklamasının BAŞINA bu rehbere tek satırlık bir referans ekle, asıl sahne açıklamasından önce:
-   "Visual guide: [ana karakter + anahtar mekan + ruh hali özeti]. [orijinal sahne açıklaması, cartoon illustration, vibrant colors, detailed, animated style]"
+   Bu rehber kullanıcıya gösterilen bir referans dokümandır — sahneler_en
+   metinlerinin İÇİNE kopyalanmaz (madde 3'teki 2-cümle kuralını bozar).
+   Sahneler_en yazarken bu rehberle TUTARLI ol (aynı karakter görünümü, aynı
+   mekan, aynı palet) ama metni rehberden alıntılarla şişirme.
 
 STİL: ${styleGuide}
 SÜRE: ${config.label}
@@ -88,7 +109,7 @@ SADECE geçerli JSON döndür (markdown yok, kod blokları yok):
   "hikaye": "Tam Türkçe hikaye metni",
   "seslendirme": "Türkçe seslendirme metni (konuşma tarzında, dramatik)",
   "sahneler_tr": ["Sahne 1 Türkçe açıklama", "Sahne 2 Türkçe açıklama", ...],
-  "sahneler_en": ["Visual guide: [character + setting + mood summary]. Scene 1 English description, cartoon illustration, vibrant colors, detailed, animated style", ...]
+  "sahneler_en": ["[Single subject]. [One action/state]. Cinematic, dramatic lighting. Cartoon illustration style.", ...]
 }`;
 }
 

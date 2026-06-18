@@ -4,7 +4,20 @@ import https from "https";
 import http from "http";
 
 const IMAGES_DIR = path.resolve(__dirname, "../../public/images");
-const REPLICATE_MODEL = "stability-ai/sdxl";
+
+// REPLICATE_IMAGE_MODEL=sdxl selects stability-ai/sdxl ($0.0049/image, better
+// prompt adherence). Anything else (including unset) defaults to the cheaper
+// stability-ai/stable-diffusion / SD1.5 ($0.0023/image) for cost testing first.
+const USE_SDXL = process.env.REPLICATE_IMAGE_MODEL === "sdxl";
+const REPLICATE_MODEL = USE_SDXL ? "stability-ai/sdxl" : "stability-ai/stable-diffusion";
+const NUM_INFERENCE_STEPS = USE_SDXL ? 30 : 25;
+
+// Tells the model what to avoid. SDXL/SD1.5 frequently render long, multi-
+// concept prompts as comic-panel grids, blueprints, or diagrams instead of a
+// single coherent illustration — this is the main lever against that.
+const NEGATIVE_PROMPT =
+  "text, letters, words, diagram, blueprint, architectural drawing, grid, comic panel, multiple people, anime, sketch, wireframe, chart, graph, infographic, monochrome, grayscale";
+
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 60; // ~2 minutes total
 
@@ -26,11 +39,15 @@ class ReplicateApiError extends Error {
   }
 }
 
-// stability-ai/sdxl is a community model, not one of Replicate's "official"
-// models, so it doesn't support the /v1/models/{owner}/{name}/predictions
-// shorthand (that 404s). We have to resolve its current version id and use
-// the general /v1/predictions endpoint instead. Cache the resolved id
-// (shared across the concurrent per-scene calls) so we only look it up once.
+// Neither stability-ai/sdxl nor stability-ai/stable-diffusion are Replicate
+// "official" models, so neither supports the
+// /v1/models/{owner}/{name}/predictions shorthand (that 404s — confirmed by
+// a live test). We have to resolve the current version id and use the
+// general /v1/predictions endpoint instead. We deliberately don't hardcode a
+// version hash: hashes go stale whenever Replicate publishes a new version,
+// and there's no way to verify one without calling the API. Cache the
+// resolved id (shared across the concurrent per-scene calls) so we only look
+// it up once per process.
 let cachedVersionId: Promise<string> | null = null;
 
 async function getLatestVersionId(apiToken: string): Promise<string> {
@@ -119,9 +136,10 @@ async function createPrediction(prompt: string, apiToken: string): Promise<Repli
       version: versionId,
       input: {
         prompt,
+        negative_prompt: NEGATIVE_PROMPT,
         width: 1024,
         height: 1024,
-        num_inference_steps: 25,
+        num_inference_steps: NUM_INFERENCE_STEPS,
         guidance_scale: 7.5,
       },
     }),
@@ -175,9 +193,9 @@ function extractImageUrl(prediction: ReplicatePrediction): string {
 }
 
 /**
- * Generate an image from a scene description using Replicate's
- * stability-ai/sdxl model. Returns the remote image URL — callers are
- * responsible for downloading/persisting it (see saveImageLocally).
+ * Generate an image from a scene description using Replicate (model
+ * selected by REPLICATE_MODEL, see above). Returns the remote image URL —
+ * callers are responsible for downloading/persisting it (see saveImageLocally).
  */
 // Replicate billing can lag a few seconds behind a credit top-up, returning
 // 402 even with a non-zero balance. Worth one short retry before giving up.
