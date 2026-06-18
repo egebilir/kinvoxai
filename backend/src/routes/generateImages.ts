@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
 import { getDb } from "../config/database";
-import { generateImages } from "../services/dalle";
+import { generateImage, saveImageLocally } from "../services/replicate";
 
 export const generateImagesRouter = Router();
 
@@ -9,6 +9,24 @@ const GenerateImagesSchema = z.object({
   jobId: z.string().min(1, "jobId is required"),
   scenes: z.array(z.string().min(1)).min(1, "At least 1 scene is required").max(20),
 });
+
+interface SceneImageResult {
+  index: number;
+  path: string;
+  error: string | null;
+}
+
+async function generateSceneImage(jobId: string, scenePrompt: string, index: number): Promise<SceneImageResult> {
+  try {
+    const remoteUrl = await generateImage(scenePrompt);
+    const localPath = await saveImageLocally(remoteUrl, jobId, index);
+    return { index, path: localPath, error: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error(`❌ Scene ${index + 1}: ${message}`);
+    return { index, path: "/images/placeholder.svg", error: `Scene ${index + 1}: ${message}` };
+  }
+}
 
 generateImagesRouter.post("/", async (req: Request, res: Response) => {
   try {
@@ -40,24 +58,33 @@ generateImagesRouter.post("/", async (req: Request, res: Response) => {
 
     console.log(`🖼️  Starting image generation for job ${body.jobId} (${body.scenes.length} scenes)`);
 
-    // Generate images (this is async and takes time)
-    const result = await generateImages(body.jobId, body.scenes);
+    // Generate + save all scene images in parallel
+    const sceneResults = await Promise.all(
+      body.scenes.map((scenePrompt, index) => generateSceneImage(body.jobId, scenePrompt, index))
+    );
+
+    const imagePaths: string[] = [];
+    const errors: string[] = [];
+    for (const { index, path: imagePath, error } of sceneResults) {
+      imagePaths[index] = imagePath;
+      if (error) errors.push(error);
+    }
 
     // Save image paths to database
     db.prepare("UPDATE stories SET image_paths = ? WHERE job_id = ?").run(
-      JSON.stringify(result.imagePaths),
+      JSON.stringify(imagePaths),
       body.jobId
     );
 
     console.log(
-      `🖼️  Image generation complete for job ${body.jobId}: ${result.imagePaths.length} images, ${result.errors.length} errors`
+      `🖼️  Image generation complete for job ${body.jobId}: ${imagePaths.length} images, ${errors.length} errors`
     );
 
     res.json({
       jobId: body.jobId,
-      status: result.errors.length === 0 ? "completed" : "partial",
-      imagePaths: result.imagePaths,
-      errors: result.errors.length > 0 ? result.errors : undefined,
+      status: errors.length === 0 ? "completed" : "partial",
+      imagePaths,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
