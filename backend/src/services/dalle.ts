@@ -43,6 +43,15 @@ function saveBase64Image(b64: string, dest: string): void {
   fs.writeFileSync(dest, Buffer.from(b64, "base64"));
 }
 
+// dall-e-2 rejects prompts over 1000 characters
+const DALLE2_MAX_PROMPT_LENGTH = 1000;
+
+function truncatePrompt(prompt: string): string {
+  return prompt.length > DALLE2_MAX_PROMPT_LENGTH
+    ? prompt.slice(0, DALLE2_MAX_PROMPT_LENGTH)
+    : prompt;
+}
+
 export interface ImageGenerationResult {
   imagePaths: string[];
   errors: string[];
@@ -61,11 +70,11 @@ async function generateSingleImage(
       console.log(`🎨 Scene ${sceneIndex + 1} (attempt ${attempt}): Generating image...`);
 
       const response = await client.images.generate({
-        model: "gpt-image-1",
-        prompt: prompt,
+        model: "dall-e-2",
+        prompt: truncatePrompt(prompt),
         n: 1,
         size: "1024x1024",
-        quality: "high",
+        response_format: "b64_json",
       });
 
       if (!response.data || response.data.length === 0) {
